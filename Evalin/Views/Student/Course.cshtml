@@ -1,0 +1,256 @@
+﻿@model Evalin.Models.CourseDetail
+
+@{
+    if (Request.IsAjaxRequest())
+    {
+        Layout = ""; 
+    }
+    else
+    {Layout = "~/Views/Shared/StudentMasterPage.cshtml";}
+}
+
+@section Scripts{
+
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        $(document).click(function () {
+            $("#Courses .dropdown-content").hide();
+        });
+
+        $(".dropbtn").click(function (e) {
+            debugger;
+            $("#Courses .dropdown-content").hide();
+            $(this).parent().children(".dropdown-content").toggle();
+            e.stopPropagation();
+        });
+
+
+        $('.panel-collapse').on('show.bs.collapse', function () {
+            $(this).siblings('.panel-heading').addClass('active');
+        });
+
+        $('.panel-collapse').on('hide.bs.collapse', function () {
+            $(this).siblings('.panel-heading').removeClass('active');
+        });
+
+    });
+
+</script>
+
+}
+
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        $(document).click(function () {
+            $("#Courses .dropdown-content").hide();
+        });
+
+        $(".dropbtn").click(function (e) {
+            debugger;
+            $("#Courses .dropdown-content").hide();
+            $(this).parent().children(".dropdown-content").toggle();
+            e.stopPropagation();
+        });
+
+        $('.panel-collapse').on('show.bs.collapse', function () {
+            $(this).siblings('.panel-heading').addClass('active');
+        });
+
+        $('.panel-collapse').on('hide.bs.collapse', function () {
+            $(this).siblings('.panel-heading').removeClass('active');
+        });
+
+    });
+
+</script>
+
+
+
+<div id="Success" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6c757d; color: white; height:50px; border-radius:0px; font-weight:500">Warning</div>
+            <div class="modal-body">Sucessfully! Saved the Exam</div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-secondary boot4cancel" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none';document.getElementById('loader').style.display='none';document.getElementById('Success').style.display='none';">Back to Builder</button>
+                <button class="btn btn-primary boot4ok" id="btnview" data-dismiss="modal" type="button" onclick="CallView()">View</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="Failure" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ff0000; color: white; height:50px; border-radius:0px; font-weight:500">Warning</div>
+            <div id="Failure_body" class="modal-body"></div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-danger boot4cancel" data-dismiss="modal" type="button" onclick=" document.getElementById('Failure').style.display = 'none';  document.getElementById('loader').style.display = 'block';">Delete</button>
+                <button class="btn boot4ok" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none'; document.getElementById('Failure').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Disable" class="modal-backdrop fade show" style="display:none;"></div>
+<div id="loader" style="display:none;"></div>
+
+
+
+<div class="content" >
+
+    <div class="container-fluid">
+     
+
+        <div style="margin-bottom:5px; text-align:right;" id="Courses">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" style="background-color: #28a745; color:white; border:1px solid #28a745; border-radius:5px;">
+                More Actions
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="dropdown-header">Shortcuts</li>
+                <li><a onclick="NewEnroll();">Enroll New Course</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Course Actions</li>
+                <li><a onclick="Results(@Model.Course.Course_Id)">Course Results</a></li>
+                <li><a class="red" onclick="LeaveCourse(@Model.Course.Course_Id)">Leave Course</a></li>
+            </ul>
+        </div>   
+       
+        
+        <div class="card card-success" >
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Course Details</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    
+                </div>
+
+            </div>
+
+            <div class="card-body panel-body panel-description" id="Courses">
+
+                <table>
+                    <tr>
+                        <td class="Heading">Course Title </td>
+                        <td>@Model.Course.Name</td>
+
+                        <td class="Heading">Teacher Name</td>
+                        <td>@Model.Teacher_Name.ToUpper()</td>
+
+                    </tr>
+                    <tr>
+                        <td class="Heading">Course Created Date </td>
+                        <td>@DateTime.Parse(@Model.Course.Date).ToString("dd-MMM-yyyy")</td>
+
+                        <td class="Heading">Course Enroll ID</td>
+                        <td>@Model.Course.Enroll_id</td>
+
+                    </tr>
+                    <tr>
+                        <td class="Heading">Course Status</td>
+                        <td>@Model.Course.Status</td>
+
+                        <td class="Heading">Course Strength</td>
+                        <td>@(Model.Strength != null ? Model.Strength.ToString() : "0")</td>
+
+                    </tr>
+
+                </table>
+
+
+            </div>
+
+        </div>
+
+
+
+        <div class="card card-success">
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Course Exams</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                </div>
+
+            </div>
+            
+            <div class="card-body">
+            
+
+                <div class="row" id="Courses">
+
+                    @if (Model.Course.exam != null && Model.Course.exam.Count() > 0)
+                    {
+
+                        for (int i = 0; i < Model.Course.exam.Count(); i++)
+                        {
+                            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6">
+                                <div class="card card-stats">
+                                    <div class="dropdown">
+                                        <!-- three dots -->
+                                        <ul class="dropbtn icons btn-right showLeft">
+                                            <li></li>
+                                            <li></li>
+                                            <li></li>
+                                        </ul>
+
+                                        <!-- menu -->
+                                        <div class="dropdown-content">
+                                            <a onclick="AttemptExam(@Model.Course.exam[i].Exam_Id);">
+                                                <i class="fa fa-eye"></i>
+                                                Attempt Exam
+                                            </a>
+                                            <a onclick="ExamGrade(@Model.Course.exam[i].Exam_Id)">
+                                                <i class="fa fa-newspaper-o"></i>
+                                                Grade
+                                            </a>
+                                            <a>
+                                                <i class="fa fa-newspaper-o"></i>
+                                                Result
+                                            </a>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="card-header card-header-warning card-header-icon">
+                                        <h3 style="margin-bottom:10px;">@Model.Course.exam[i].Exam_Name.ToString()</h3>
+                                        <h2 class="card-title">
+                                            Total Marks : @Model.Course.exam[i].Total_Marks.ToString()
+                                            <br />
+                                            Duration : @Math.Round(@Model.Course.exam[i].Duration.TotalMinutes).ToString() min
+                                        </h2>
+                                    </div>
+                                    <hr />
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            <h7 class="Timings">
+                                                <small>@String.Format("{0:ddd MMMM dd, yyyy}", @Model.Course.exam[i].Exam_Date)</small><br />
+                                                <small>@String.Format("{0:hh:mm tt}", @Model.Course.exam[i].Start_Time) -  @String.Format("{0:hh:mm tt}", @Model.Course.exam[i].End_Time)</small>
+                                            </h7>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    }
+                </div>
+
+
+
+            </div>
+            
+        </div>
+
+
+
+
+    </div>
+</div>

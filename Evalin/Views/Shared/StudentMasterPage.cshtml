@@ -1,0 +1,593 @@
+﻿@{   var viewmodel = new Evalin.Models.Dashboard() { user = (Evalin.Models.Student)(Session["CurrentUser"]), Courses = Evalin.Models.DataAccess.GetCourses(((Evalin.Models.Student)Session["CurrentUser"]).Id, ((Evalin.Models.Student)Session["CurrentUser"]).type) };
+     }
+<!DOCTYPE html>
+
+<html>
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Evalin</title>
+    
+    @*Main Page Css*@
+    
+    <link rel="shortcut icon" href="~/Images/logo.png">
+    <link rel="stylesheet" href="~/Content/adminlte.min.css">
+    <link rel="stylesheet" href="~/Content/OverlayScrollbars.min.css">
+    <link href="~/Content/fonts.min.css" rel="stylesheet" />
+    @*Main Page Css*@
+
+
+    @*Course Page Css*@
+
+    <link href="~/Content/Course_Style_Student.css" rel="stylesheet" />
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    
+    @*Course Page Css*@
+
+    @RenderSection("Contents", false)
+
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.overlayScrollbars.min.js"></script>
+    <script src="~/Scripts/adminlte.js"></script>
+    <script src="https://kit.fontawesome.com/1d34d0b336.js" crossorigin="anonymous"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    @*Course Page js*@
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    @*Course Page js*@
+    <script type="text/javascript">
+
+    window.onpopstate = function (e) {
+        debugger;
+        var Controller = window.location.href.split('/')[3];
+        var View = window.location.href.split('/')[4];
+        if (Controller.toString() != "" || View.toString() != "") {
+            var link = "@Url.Action("View","Controller")";
+            window.location.href = link.replace("View", View).replace("Controller",Controller);
+        }
+        else
+        { window.location.href = "@Url.Action("Dashboard","Student")"; }
+
+    }
+
+    function Logout() {
+        window.location.href = "@Url.Action("logout","Account")";
+    }
+
+    function CallAjax(ViewName, ControllerName, RequestType) {
+
+        if (RequestType == undefined)
+        { RequestType = "Get"; }
+
+        if (ControllerName == undefined)
+        { ControllerName = "Student"; }
+
+        var loader = setTimeout(function () { Loader(true); }, 1000);
+
+        $.ajax({
+            url: "/" + ControllerName + "/" + ViewName + "",
+            type: RequestType
+        }).success(function (result, status, xhr) {
+            if (result.search('<body id="LoginPage">') != -1)
+            { window.location.href = "@Url.Action("Login","Account")"; }
+            else if (result.search('<body id="ErrorPage">') != -1)
+            { window.location.href = "@Url.Action("Error","Account")"; }
+            else
+            {
+                try{
+                    $('#MainDiv').html(result);
+                    window.history.pushState("object or string", "Title", "/" + ControllerName + "/" + ViewName);
+                }
+                catch(e)
+                {}
+            }
+
+        }).fail(function (e) {
+            window.location.href = "@Url.Action("Error","Account")";
+        }).complete(function () {
+            clearTimeout(loader);
+            Loader(false);
+        });
+
+
+    }
+
+    function BrowseCourse(Courseid) {
+        var loader = setTimeout(function () { Loader(true); }, 1000);
+
+        $.ajax({
+            url: "/Student/Course",
+            type: "Get",
+            data: { CourseId: Courseid }
+        }).success(function (result, status, xhr) {
+            if (result.search('<body id="LoginPage">') != -1)
+            { window.location.href = "@Url.Action("Login","Account")"; }
+            else if (result.search('<body id="ErrorPage">') != -1)
+            { window.location.href = "@Url.Action("Error","Account")"; }
+            else
+            {
+                try{
+                    $('#MainDiv').html(result);
+                    window.history.pushState("object or string", "Title", "/Student/Course?CourseId=" + Courseid);
+                }
+             catch(e)
+                {}
+            }
+
+        }).fail(function (e) {
+            window.location.href = "@Url.Action("Error","Account")";
+        }).complete(function () {
+            clearTimeout(loader);
+            Loader(false);
+        });
+
+    }
+
+        function Loader(Condition) {
+            if (Condition) {
+                document.getElementById('Disable').style.display = "block";
+                document.getElementById('loader').style.display = "block";
+            }
+            else {
+                debugger;
+                document.getElementById('Disable').style.display = "none";
+                document.getElementById('loader').style.display = "none";
+            }
+
+        }
+
+
+
+    //Course Page JS
+
+
+
+    function AttemptExam(Eid) {
+        $.ajax({
+            url: "/Student/PreExamValidate",
+            type: "Get",
+            data: { Eid: Eid }
+        }).success(function (e) {
+
+            $.confirm({
+                title: 'Begin Exam !',
+                content: 'Are you sure you want to Begin Exam. \n Once you Start it wont be revert back',
+                type: 'green',
+                typeAnimated: true,
+                buttons: {
+                    Proceed: {
+                        text: 'Proceed',
+                        btnClass: 'btn-green',
+                        action: function () {
+                            BeginExam(Eid);
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+
+        }).fail(function (e) {
+
+            $.confirm({
+                title: 'Invalid Request !',
+                content: e.statusText,
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    tryAgain: {
+                        text: 'Try again',
+                        btnClass: 'btn-red',
+                        action: function () {
+                            AttemptExam(Eid);
+                        }
+                    },
+                    close: function () {
+                    }
+                }
+            });
+
+        });
+
+    }
+
+    function BeginExam(Eid) {
+
+        $.ajax({
+            url: "/Student/Exam",
+            type: "Get",
+            data: { Eid: Eid }
+        }).success(function (result, status, xhr) {
+            if (result.search('<body id="LoginPage">') != -1)
+            { window.location.href = "@Url.Action("Login","Account")"; }
+            else if (result.search('<body id="ErrorPage">') != -1)
+            { window.location.href = "@Url.Action("Error","Account")"; }
+            else
+            {
+                $('#MainDiv').html(result);
+                window.history.pushState("object or string", "Title", "/Student/Exam?Eid=" + Eid);
+            }
+
+        }).fail(function (e) {
+            window.location.href = "@Url.Action("Error","Account")";
+        });
+
+    }
+
+
+    function NewEnroll() {
+
+        $.confirm({
+            boxWidth: '30%',
+            useBootstrap: false,
+            typeAnimated: true,
+            animation: 'scale',
+            closeAnimation: 'scale',
+            type: 'blue',
+            title: 'New Enrollement!',
+            content: '' +
+            '<form action="" class="formName">' +
+            '<div class="form-group">' +
+            '<label>Course Enroll Id</label>' +
+            '<input type="text" placeholder="Enroll Id" class="name form-control" required />' +
+             '<label>Enroll Password</label>' +
+            '<input type="password" placeholder="Password" class="pass form-control" required />' +
+            '</div>' +
+            '</form>',
+            buttons: {
+                formSubmit: {
+                    text: 'Enroll',
+                    btnClass: 'btn-blue',
+                    action: function () {
+                        var enrollid = this.$content.find('.name').val();
+                        var enrollpass = this.$content.find('.pass').val();
+                        if (enrollid == "" || enrollpass == "") {
+                            $.alert('Fields Are Mandatory');
+                            return false;
+                        }
+                        else {
+                            $.ajax({
+                                url: "/Student/CourseEnroll",
+                                type: "Get",
+                                data: { CourseEnrollId: enrollid, Password: enrollpass }
+                            }).success(function (result, status, xhr) {
+                                debugger;
+                                var CourseId = xhr.statusText.split("-")[1];
+                                var CourseName = xhr.statusText.split("-")[2];
+                                $.confirm({
+                                    title: 'Visit Course!',
+                                    content: 'Would you like to Visit "' + CourseName + '"',
+                                    type: 'green',
+                                    typeAnimated: true,
+                                    buttons: {
+                                        tryAgain: {
+                                            text: 'Visit',
+                                            btnClass: 'btn-green',
+                                            action: function () {
+                                                var link = "@Url.Action("Course", "Student", new { CourseId = "123456789" })";
+                                                window.location.href = link.replace("123456789", CourseId);
+                                            }
+                                        },
+                                        close: function () {
+                                            location.reload();
+                                        }
+                                    }
+                                });
+
+                            }).fail(function (e) {
+
+                                $.alert(e.statusText);
+                                return false;
+                            });
+
+                        }
+
+                    }
+                },
+                cancel: function () {
+                },
+            },
+            onContentReady: function () {
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    e.preventDefault();
+                    jc.$$formSubmit.trigger('click');
+                });
+            }
+        });
+
+    }
+
+
+    function LeaveCourse(Cid) {
+        $.confirm({
+            title: 'Leave Course !',
+            content: 'Are you sure you want to Leave this Course',
+            type: 'red',
+            typeAnimated: true,
+            buttons: {
+                tryAgain: {
+                    text: 'Leave',
+                    btnClass: 'btn-red',
+                    action: function () {
+
+                        $.ajax({
+                            url: "/Student/LeaveCourse",
+                            type: "Post",
+                            data: { CourseId: Cid }
+                        }).success(function () {
+
+                            $.alert({
+                                title: 'Successfully Leave!',
+                                type: 'green',
+                                content: 'You have succesfully Leave the Course',
+                            });
+
+                            var link = "@Url.Action("Dashboard", "Student")";
+                            window.location.href = link;
+
+                        }).fail(function () {
+
+                            $.alert({
+                                title: 'Alert Error!',
+                                type: 'red',
+                                content: 'An Error has occured while leaving this Course',
+                            });
+
+                        });
+
+                    }
+                },
+                close: function () {
+                }
+            }
+        });
+
+    }
+
+        function ExamGrade(Eid)
+        {
+            debugger;
+            var color = 'green';
+            var sad = '<img src="/Images/Grade_Sad.gif" style="width:180px; height:180px;"  />';
+            var happy = '<img src="/Images/Grade_Happy.gif" style="width:180px; height:180px;" />';
+            var reaction_image = happy;
+               $.ajax({ url: "/Student/GetGrade",
+                                type: "Get",
+                                data: { ExamId: Eid }
+                                }).success(function (result, status, xhr) {
+                                    debugger;
+                                    if (result.Grade == 'You have not Attempt the Exam Yet')
+                                    {
+                                        $.alert({
+                                            title: 'Invalid Request!',
+                                            type: 'red',
+                                            content: result.Grade,
+                                        });
+                                    }
+                                    else if (result.Grade == 'You havent Completed the Exam')
+                                    {
+                                        $.alert({
+                                            title: 'Invalid Request!',
+                                            type: 'red',
+                                            content: result.Grade,
+                                        });
+
+                                    }
+                                    else {
+
+                                        if (result.Grade == 'F') {
+                                            reaction_image = sad;
+                                            color = 'red';
+                                        }
+                                        $.confirm({
+                                            boxWidth: '20%',
+                                            useBootstrap: false,
+                                            typeAnimated: true,
+                                            animation: 'scale',
+                                            closeAnimation: 'scale',
+                                            type: color,
+                                            title: '',
+                                            content: '' +
+                                            '<form action="" class="formName" style="text-align:center;">' +
+                                            '<div class="form-group" style="display:inline-grid;text-align:center;">' +
+                                            reaction_image +
+                                            '<span><span class="Grade_Headers">Grade : </span class="Grade_Text">' + result.Grade + '</span></span>' +
+                                            '<span><span class="Grade_Headers">Score : </span class="Grade_Text">' + result.ObtainedMarks + ' Out of ' + result.TotalMarks + '</span></span>' +
+                                            '<span><span class="Grade_Headers">Percentage : </span class="Grade_Text">' + result.Percentage + '%</span> </span>' +
+                                            '</div>' +
+                                            '</form>',
+                                            buttons: {
+                                                close: function () {
+
+                                                },
+                                            }
+                                        });
+                                    }
+
+
+                              
+                            }).fail(function (e) {
+
+                                $.alert({
+                                    title: 'Invalid Request!',
+                                    type: 'red',
+                                    content: 'An Error has occured while loading Grade',
+                                });
+                                
+                            });
+
+     
+        }
+
+
+    //Course Page JS
+
+
+
+    </script>
+
+    @RenderSection("Scripts", false)
+
+
+
+
+
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div id="Disable" class="modal-backdrop fade show" style="display:none;"></div>
+    <div id="loader" style="display:none;"></div>
+
+    <div class="wrapper">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="padding: 2px; position: sticky; top: 0px;">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" ><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+         
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" >
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-warning navbar-badge">15</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">15 Notifications</span>
+                        <div class="dropdown-divider"></div>
+                        <a  class="dropdown-item">
+                            <i class="fas fa-envelope mr-2"></i> 4 new messages
+                            <span class="float-right text-muted text-sm">3 mins</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a  class="dropdown-item">
+                            <i class="fas fa-users mr-2"></i> 8 friend requests
+                            <span class="float-right text-muted text-sm">12 hours</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a  class="dropdown-item">
+                            <i class="fas fa-file mr-2"></i> 3 new reports
+                            <span class="float-right text-muted text-sm">2 days</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a  class="dropdown-item dropdown-footer">See All Notifications</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" style="padding-left:0px; padding-right:0px; padding-top:4px; padding-bottom:4px; margin-left:10px; margin-right:10px; margin-bottom:5px;">
+                        <img src="@(viewmodel.user.ImageLocation.ToString())"  style="border-radius: 50%; max-width: 100%; max-height: 100%; vertical-align: top; width: 35px; height: 40px; " alt="User Image" onerror="this.onerror = null; this.src = '/Images/ImagePlaceholder.jpg'">
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="min-width:210px; max-width:500px; ">
+
+                        <img src="@(viewmodel.user.ImageLocation.ToString())"  style="border-radius: 50%; vertical-align: top; height: 90px; width: 90px; margin-left: auto; margin-right: auto; display: block; margin-top: 10px; margin-bottom: 30px; " alt="User Image" onerror="this.onerror = null; this.src = '/Images/ImagePlaceholder.jpg'">
+
+                        <div style=" width: 100%; text-align: center; margin-bottom: 10px; padding-left:10px; padding-right:10px; line-height:18px; ">
+                            <p style="font-family: Calibri; font-size: large;  cursor: default;">@(viewmodel.user.Fullname.ToString())</p>
+                            <p style="font-family: Calibri; font-size: 14px; cursor: default;  "> @(viewmodel.user.Emailaddress.ToString())</p>
+                        </div>
+
+                        <div style="display:inline; width:100%; height:100% ; ">
+                            <button class="dropdown-item" style="float: left; width: 50%; text-align: center; clear: none; background-color:red; color:white;" onclick="Logout()">Logout</button>
+                            <button id="Pro" class="dropdown-item" style="float: right; width: 50%; text-align: center; clear: none; background-color: limegreen; color: white;" onclick="CallAjax('Profile')">Profile</button>
+                        </div>
+                    </div>
+
+                </li>
+            </ul>
+        </nav>
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="index3.html" class="brand-link">
+                <img src="/Images/logo.png" alt="AdminLTE Logo" class="brand-image elevation-3"
+                     style="box-shadow: none !important; border-radius: 50%;" />
+                <span class="brand-text font-weight-light">Evalin</span>
+            </a>
+            <div class="sidebar">
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex" style="">
+                    <div class="image" style="padding-left:8px;">
+                        <img src="@(viewmodel.user.ImageLocation.ToString())" alt="User Image" style="width: 40px; height: 40px; border-radius: 50%;" onerror="this.onerror = null; this.src = '/Images/ImagePlaceholder.jpg'">
+                    </div>
+                    <div class="info" style="padding-top:9px;">
+                        <a class="d-block" onclick="CallAjax('Profile')" style="cursor:pointer">@(viewmodel.user.Fullname)</a>
+                    </div>
+                </div>
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item has-treeview menu-open">
+                            <a  class="nav-link active" onclick="CallAjax('Dashboard')">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>
+                                    Dashboard
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item has-treeview" style="">
+                            <a  class="nav-link">
+                                <i class="nav-icon fas fa-copy"></i>
+                                <p>
+                                    Courses
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+
+                                @{
+                                    foreach (Evalin.Models.Course items in viewmodel.Courses)
+                                    {
+                                        <li class="nav-item">
+                                            <a  class="nav-link" style="max-width:202px; box-sizing:initial; white-space:normal; padding-left:19px;" onclick="BrowseCourse(@items.Course_Id)">
+                                                <p>@(items.Name.ToString())</p>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </li>
+                        <li class="nav-item has-treeview" style="">
+                            <a class="nav-link" onclick="NewEnroll()">
+                                <i class="nav-icon fa fa-plus-circle"></i>
+                                <p>
+                                    Enroll Course
+                                 </p>
+                            </a>
+                        </li>
+                        <li class="nav-item has-treeview" style="">
+                            <a class="nav-link" onclick="CallAjax('Results')">
+                                <i class="nav-icon fa fa-file-text"></i>
+                                <p>
+                                    Results
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item has-treeview" style="">
+                            <a class="nav-link" onclick="CallAjax('Profile')">
+                                <i class="nav-icon fa fa-user"></i>
+                                <p>
+                                    Profile
+                                </p>
+                            </a>
+                        </li>
+
+</nav>
+            </div>
+        </aside>
+        <div class="content-wrapper" id="MainDiv" style="padding:10px;">
+        @RenderBody()
+        </div>
+        <footer class="main-footer">
+            <h7>Copyright &copy; 2019-2020</h7>
+            <div class="float-right d-none d-sm-inline-block">
+                <b>Version</b>1.2
+            </div>
+        </footer>
+        <aside class="control-sidebar control-sidebar-dark">
+        </aside>
+    </div>
+
+
+
+</body>
+
+</html>

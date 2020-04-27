@@ -1,0 +1,893 @@
+﻿@model Evalin.Models.Exam
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jodit.min.js"></script>
+<script src="~/Scripts/boot4alert.min.js"></script>
+
+<link href="~/Content/jodit.min.css" rel="stylesheet" />
+
+@{
+    ViewBag.Title = "AddExam";
+    if (Request.IsAjaxRequest())
+    { Layout = ""; }
+    else
+    { Layout = "~/Views/Shared/TeacherMasterPage.cshtml"; }
+
+    int qid = 0;
+
+    Evalin.Models.User user = (Evalin.Models.User)Session["CurrentUser"];
+
+    var Courses = Evalin.Models.DataAccess.GetCourses(user.Id, "Teacher", ViewBag.Cid.ToString());
+    
+}
+
+
+<div id="Success" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6c757d; color: white; height:50px; border-radius:0px; font-weight:500">Saved</div>
+            <div class="modal-body" >Sucessfully! Saved the Exam</div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-secondary boot4cancel" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none';document.getElementById('loader').style.display='none';document.getElementById('Success').style.display='none';">Back to Builder</button>
+                <button class="btn btn-primary boot4ok" id="btnview" data-dismiss="modal" type="button" >View</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="Failure" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ff0000; color: white; height:50px; border-radius:0px; font-weight:500">Error Occured</div>
+            <div class="modal-body">Error! While Saving the Exam try Again in a while</div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-secondary boot4cancel" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none';document.getElementById('loader').style.display='none';document.getElementById('Failure').style.display='none'">Back to Builder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Disable" class="modal-backdrop fade show"  style="display:none;"></div>
+<div id="loader" style="display:none;"></div>
+
+<h3 style="font-family:abeatbyKai; margin-bottom:0px;">Exam Builder</h3>
+
+@using (Html.BeginForm("AddExam", "Teacher",FormMethod.Post,new { @id="form"}))
+{
+                     
+    <div id="ExamDetail" style="width:100% ; height:auto; background-color:#e9e9e9; padding:5px; padding-top:0px; " >
+
+
+        <div class="row">
+
+            <div style="min-width: 280px;  display: flex; " class="col-md-4" >
+
+                <div style="width: 55%; margin-right: 5px; ">
+
+                    <span style="position: absolute; top: 10px;  font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">Exam Title</span>
+                    @Html.TextBoxFor(m => m.Exam_Name, new { @id="examtitle" ,@placeholder="Exam Title" ,@style="border: none; width:100%; height: 41px; border-bottom: 3px solid black; margin-top: 28px; border-radius: 6px; padding: 7px; ", @onfocus="document.getElementById(this.id).style.outline='0'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; ", @onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black';"})    
+                </div>
+
+                    <div style="max-width: 45%; width:45%;">
+                    <span style="position: absolute; top: 10px;  font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">Course Name</span>
+    
+                    @Html.DropDownListFor(m => m.Course_Id, new SelectList(@Courses, "Course_Id", "Name"), new { @id = "company", @class = "form-control", @style = "border:none; height: 41px; border-bottom: 3px solid black; margin-top: 28px; width:100%;  border-radius:6px;", @onfocus = "document.getElementById(this.id).style.border = 'none'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; ", @onblur = "    document.getElementById(this.id).style.borderBottom = '3px solid black'" })
+
+                    </div>
+
+            </div>
+
+
+            <div style="display: flex; min-width:435px;"  class="col-md-4" >
+
+                <div style="margin-right:2px;" class="form-inline inline-block">
+
+                    <span style="position: absolute; top: 10px; left: 10px; font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">Exam Date</span>
+                    @Html.TextBoxFor(m => m.Exam_Date, new { @type="date", @id="datePicker" ,@style="border:none; height: 41px; border-bottom: 3px solid black; margin-top: 28px; width: auto; border-radius: 6px; margin-right: 3px; padding: 7px; " ,@placeholder="Exam Date" ,@onfocus="document.getElementById(this.id).style.outline='0'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; " ,@onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black'"})
+                </div>
+
+                <div style="margin-right:2px;" class="form-inline inline-block">
+                    <span style="width:fit-content; position: absolute; top: 10px; font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">Start Time</span>
+               @Html.TextBoxFor(m => m.Start_Time, new {@type="time", @id="timepickerstart" ,@placeholder="Exam Time" ,@style="border: none; height: 41px; border-bottom: 3px solid black; margin-top: 28px; width: auto; border-radius: 6px; margin-right: 3px; padding: 7px; " ,@onfocus="document.getElementById(this.id).style.outline='0'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; " ,@onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black';" })
+                
+                 </div>
+
+                <div style="margin-right:2px;" class="form-inline inline-block">
+                    <span style="width: fit-content;  position: absolute; top: 10px; font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">End Time</span>
+                @Html.TextBoxFor(m => m.End_Time, new {@type="time" ,@id="timepickerend", @placeholder="Exam Time", @style="border: none; height: 41px; border-bottom: 3px solid black; margin-top: 28px; width: auto; border-radius: 6px; margin-right: 3px; padding: 7px; ", @onfocus="document.getElementById(this.id).style.outline='0'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; " ,@onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black';" })
+                </div>
+
+                </div>
+
+            <div style="display: flex;" class="col-md-2">
+              
+                <div style="margin-right:2px;">
+                    <span style="width: fit-content;  position: absolute; top: 10px; font-weight: 600; font-size: 12px; opacity: 1; color: #808080; transition: 0.2s ease all; ">Passing Marks</span>
+                    @Html.TextBoxFor(m => m.Passing_Marks, new {  @type="number", @value="100" ,@min="0" , @max="1000" ,@id="duration" ,@style="border: none; height: 41px; border-bottom: 3px solid black; margin-top: 28px; width: 80px; border-radius: 6px; margin-right: 3px; padding: 7px; " ,@onfocus="document.getElementById(this.id).style.outline='0'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; " ,@onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black';"})
+                </div>
+
+                <div class="dropdown" style="float:left">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="height: 42px; border-bottom: 3px solid black; margin-top: 27px; width:auto; border-radius:6px;" onfocus="document.getElementById(this.id).style.border = 'none'; document.getElementById(this.id).style.borderBottom = '3px solid blue'; " onblur="    document.getElementById(this.id).style.borderBottom = '3px solid black'">
+                        Add Section
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item"   onclick="AddPart('',false)">Empty Section</a>
+                        <a class="dropdown-item"   onclick="AddPart('Descriptive',true)">Descriptive</a>
+                        <a class="dropdown-item"   onclick="AddPart('MCQS',true)">MCQ's</a>
+                        <a class="dropdown-item"   onclick="AddPart('Truefalse',true)">True False</a>
+                        <a class="dropdown-item"   onclick="AddPart('fillintheblanks',true)">Fill In The Blanks</a>
+                    </div>
+                </div>
+
+                <div style="display:flex;">
+                    @Html.CheckBoxFor(m => m.AutoSubmit, new { @type="checkbox" ,@class="option-input radio" ,@name="autosubmit"  ,@checked="checked" ,@value="true" ,@style="margin-left: 5px; margin-right: 7px; top: 43px; position: relative; left:0px; border-radius:0px;" })
+
+                    <div class="tooltip" style="display:contents; height:auto;" >
+                        <span style="float: left; width: max-content; top: 43px; position: relative; left: 0px;">Auto Submit</span>
+                        <span class="tooltiptext" style="top: 70px; width:200px; background-color: #6c757d; font-size:smaller">If Checked Paper will be automatically Submited on End Time Otherwise Duration will be Considered</span>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        </div>
+
+    
+    
+    
+    
+    <div id="Content" style="width: 100%; height: auto; min-height: 80px;margin-top: 10px;  display:block; " >
+
+    </div>
+     
+
+   <button class="btn btn-secondary" type="button" id="dropdownMenuButton" style="height: 42px; border-bottom: 3px solid black; width:auto; border-radius:6px; position:absolute; right:10px;" value="Submit" onclick="SaveExam()">
+        Finish Builder
+    </button>
+            
+
+}
+ 
+
+
+<script type="text/javascript" >
+
+    var id = 0;
+    var oid = 0;
+
+    AddPart('Descriptive',false);
+   
+    function DeleteOption(parentid)
+    {   document.getElementById(parentid).parentNode.removeChild(document.getElementById(parentid));}
+
+    function AddOption(superparentid)
+    {  
+        
+            if (document.getElementById(superparentid).children.length < 6)
+            {
+                    var div = document.createElement('div');
+                div.className="input-group";
+                div.id=superparentid+oid;
+                div.innerHTML = `
+                            <input type="radio" class="option-input radio" name="`+superparentid+`" />
+                            <input name="Sections[!].Questions[#].Options[%]" type="text" placeholder="Option.." class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 40px; border-radius: 8px; max-width: 150px;  display:block;" />
+                            <img src="/Images/addoption.png" width="40" height="40" style="padding:5px" onclick="AddOption(this.parentNode.parentNode.id)" />
+                            <img src="/Images/removeoption.png" width="40" height="40" style="padding: 5px;" onclick="DeleteOption(this.parentNode.id)" />
+                    `;
+                document.getElementById(superparentid).appendChild(div);
+                oid++;
+            }
+        }
+
+    function AddQuestion(pid,type)
+    {  var div = document.createElement('div');
+        div.style.width="100%";
+        div.style.height="auto";
+        div.style.minHeight="30px";
+        div.style.backgroundColor="#d4d3d3";
+        div.style.paddingLeft="30px";
+        div.style.paddingRight="30px";
+        div.style.paddingTop="2px";
+        div.style.paddingBottom="2px";
+        div.className = "Question";
+        div.id = "Question"+id
+
+        if (type == 'Descriptive')
+            {
+        div.innerHTML = `
+                <div class="Detail" style="float:right; display:flex; margin-bottom:5px; width:100%;">
+                    <h6 style="margin-top:auto; margin-bottom:3px; margin-left:5px;">Descriptive Question</h6>
+                    <input name="Sections[!].Questions[#].Question_Marks" type="text" placeholder="Marks" class="form-control" style="width: 80px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; border-radius: 8px; height: 44px; display:block; margin-right:5px; margin-right:0px; margin-left:auto;" />
+                    <input name="Sections[!].Questions[#].Question_Order" type="number" max="100" min="1" contenteditable="false" placeholder="Order" class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 80px; text-align: center; display:block;  margin-right:0px; margin-left:5px;" />
+                    <img id="Questionimg`+id+`" class="img" src="/Images/blackclose.png" style="width: 50px; padding-left:5px; padding-right:5px; padding-bottom:5px; box-sizing: border-box; height:10%; margin-right:0px; margin-left:0px;" onclick="delete_element(this.id)" onmouseover = "RedClose(this.id)" onmouseout = "BlackClose(this.id)" />
+                </div>
+                <input type="text" name="Sections[!].Questions[#].Type" value="Descriptive" id="QuestionType`+id+`" style="Display:none;">
+                <input type="text" name="Sections[!].Questions[#].QuestionText" id="QuestionEditor`+id+`">
+                <input type="text" name="Sections[!].Questions[#].Sample_Answer" id="AnswerEditor`+id+`">
+        `;
+        }
+        else if (type == 'MCQS')
+        {
+            div.innerHTML = `
+              <div class="Detail" style="float:right; display:flex; margin-bottom:5px; width:100%;">
+                    <h6 style="margin-top:auto; margin-bottom:3px; margin-left:5px;">Multiple Choice Question</h6>
+                    <input name="Sections[!].Questions[#].Question_Marks" type="text" placeholder="Marks" class="form-control" style="width: 80px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; border-radius: 8px; height: 44px; display:block; margin-right:5px; margin-right:0px; margin-left:auto;" />
+                    <input name="Sections[!].Questions[#].Question_Order" type="number" max="100" min="1" contenteditable="false" placeholder="Order" class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 80px; text-align: center; display:block;  margin-right:0px; margin-left:5px;" />
+                    <img id="Questionimg`+id+`" class="img" src="/Images/blackclose.png" style="width: 50px; padding-left:5px; padding-right:5px; padding-bottom:5px; box-sizing: border-box; height:10%; margin-right:0px; margin-left:0px;" onclick="delete_element(this.id)" onmouseover = "RedClose(this.id)" onmouseout = "BlackClose(this.id)"/>
+                </div>
+                                    
+                    <input type="text" name="Sections[!].Questions[#].Type" value="MCQ" id="QuestionType`+id+`" style="Display:none;">
+                    <input type="text" name="Sections[!].Questions[#].QuestionText" id="QuestionEditor`+id+`">
+                    <div style="display:none;"><input type="text"  id="AnswerEditor`+id+`"></div>
+                
+                    <div id="`+div.id+`Options" style="display:inline-block" class="MCQOptions">
+
+                        <div class="input-group" id="`+div.id+`Options`+(oid+1)+`">
+                            <input type="radio" class="option-input radio" name="`+div.id+`Options" checked="checked"/>
+                            <input name="Sections[!].Questions[#].Options[%]" type="text" placeholder="Option.." class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 40px; border-radius: 8px; max-width: 150px;  display:block;" />
+                            <img src="/Images/addoption.png" width="40" height="40" style="padding:5px" onclick="AddOption(this.parentNode.parentNode.id)"  />
+                        </div>
+                        <div class="input-group" id="`+div.id+`Options`+(oid+2)+`">
+                            <input type="radio" class="option-input radio" name="`+div.id+`Options" />
+                            <input name="Sections[!].Questions[#].Options[%]" type="text" placeholder="Option.." class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 40px; border-radius: 8px; max-width: 150px;  display:block;" />
+                            <img src="/Images/addoption.png" width="40" height="40" style="padding:5px" onclick="AddOption(this.parentNode.parentNode.id)" />
+                        </div>
+                        <div class="input-group" id="`+div.id+`Options`+(oid+3)+`">
+                            <input type="radio" class="option-input radio" name="`+div.id+`Options" />
+                            <input name="Sections[!].Questions[#].Options[%]" type="text" placeholder="Option.." class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 40px; border-radius: 8px; max-width: 150px;  display:block;" />
+                            <img src="/Images/addoption.png" width="40" height="40" style="padding:5px" onclick="AddOption(this.parentNode.parentNode.id)" />
+                            <img src="/Images/removeoption.png" width="40" height="40" style="padding: 5px;" onclick="DeleteOption(this.parentNode.id)" />
+                        </div>
+
+                    </div>
+        `;
+        oid= oid+3;
+        }
+        else if(type == 'Truefalse')
+        {
+            div.innerHTML = `
+                
+                <div class="Detail" style="float:right; display:flex; margin-bottom:5px; width:100%;">
+                    <h6 style="margin-top:auto;  margin-bottom:3px; margin-left:5px;">True & False</h6>
+                    <input name="Sections[!].Questions[#].Question_Marks" type="text" placeholder="Marks" class="form-control" style="width: 80px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; border-radius: 8px; height: 44px; display:block; margin-right:5px; margin-right:0px; margin-left:auto;" />
+                    <input name="Sections[!].Questions[#].Question_Order" type="number" max="100" min="1" contenteditable="false" placeholder="Order" class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 80px; text-align: center; display:block;  margin-right:0px; margin-left:5px;" />
+                    <img id="Questionimg`+id+`" class="img" src="/Images/blackclose.png" style="width: 50px; padding-left:5px; padding-right:5px; padding-bottom:5px; box-sizing: border-box; height:10%; margin-right:0px; margin-left:0px;" onclick="delete_element(this.id)" onmouseover = "RedClose(this.id)" onmouseout = "BlackClose(this.id)" />
+                </div>
+                
+                      <input type="text" name="Sections[!].Questions[#].Type" value="TF" id="QuestionType`+id+`" style="Display:none;">
+                      <input type="text" name="Sections[!].Questions[#].QuestionText" id="QuestionEditor`+id+`">
+                      <div style="display:none;"><input type="text"  id="AnswerEditor`+id+`"></div>
+                Correct Answer : 
+                <input type="radio" class="option-input radio" name="`+id+`Sections[!].Questions[#].Sample_Answer" checked="checked"  value = "True" style="margin-left:5px; margin-right:7px;"/>TRUE
+                <input type="radio" class="option-input radio" name="`+id+`Sections[!].Questions[#].Sample_Answer" value = "False" style="margin-left:5px; margin-right:7px;"/>FALSE
+            
+        `;
+        }
+        else if(type == 'fillintheblanks')
+        {
+            div.innerHTML = `
+                
+                <div class="Detail" style="float:right; display:flex; margin-bottom:5px; width:100%;">
+                    <h6 style="margin-top:auto;  margin-bottom:3px; margin-left:5px;">Fill In The Blanks</h6>
+                    <input name="Sections[!].Questions[#].Question_Marks" type="text" placeholder="Marks" class="form-control" style="width: 80px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; border-radius: 8px; height: 44px; display:block; margin-right:5px; margin-right:0px; margin-left:auto;" />
+                    <input name="Sections[!].Questions[#].Question_Order" type="number" max="100" min="1" contenteditable="false" placeholder="Order" class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 80px; text-align: center; display:block;  margin-right:0px; margin-left:5px;" />
+                    <img id="Questionimg`+id+`" class="img" src="/Images/blackclose.png" style="width: 50px; padding-left:5px; padding-right:5px; padding-bottom:5px; box-sizing: border-box; height:10%; margin-right:0px; margin-left:0px;" onclick="delete_element(this.id)" onmouseover = "RedClose(this.id)" onmouseout = "BlackClose(this.id)" />
+                </div>
+                
+                      <input type="text" name="Sections[!].Questions[#].Type" value="FB" id="QuestionType`+id+`" style="Display:none;">
+                      <input type="text" name="Sections[!].Questions[#].QuestionText" id="QuestionEditor`+id+`">
+                      <div style="display:none;"><input type="text"  id="AnswerEditor`+id+`"></div>
+            *Note : Underline Those words where you want User Input. These words later be displayed as Blanks.
+        `;
+        }
+
+
+        document.getElementById(pid).appendChild(div);
+        CallJodit(id,'');
+        id++;
+
+        var jump = 'Question'+(id-1);
+        document.getElementById(jump).scrollIntoView();
+        
+    }
+
+
+    function AddPart(type,flag)
+    {
+        var div = document.createElement('div');
+        div.style.width="100%";
+        div.style.height="auto";
+        div.style.minHeight="30px";
+        div.style.marginBottom="10px";
+        div.style.backgroundColor="#d4d3d3";
+        div.style.paddingLeft="30px";
+        div.style.paddingRight="30px";
+        div.style.paddingTop="10px";
+        div.style.paddingBottom="10px";
+        div.className = "Part";
+        div.id = "Part"+id
+
+        div.innerHTML = `
+
+           <div class="PartDetail" style="float:right; display:flex; margin-bottom:5px; width:100%;">
+        
+
+               <h5 style="margin-top:auto;  margin-bottom:3px; margin-left:5px;">Section</h5>
+               
+               <div class="dropdown" style="margin-right:7px; margin-top:2px; margin-right:2px; margin-left:auto;" >
+                    <img class="dropbtn" src="/Images/addimg.png" style="border-radius:40px; width:40px; height:40px; box-sizing:border-box; padding:2px; background-color:black; "/>
+                    <div class="dropdown-content" style="border-radius: 40px; width: 50px; height: auto; background-color: black; padding: 2px; z-index:10; left:-5px;">
+       
+                        <img src="/Images/descriptive2.png" title="Descriptive Questions" style="border-radius: 40px; width: 100%; height: 50px; padding-bottom:3px;" onclick="AddQuestion(this.parentNode.parentNode.parentNode.parentNode.id,'Descriptive')"/>
+                        <img src="/Images/blanks.png" title="Fill In The Blanks" style="border-radius: 40px; width: 100%; height: 50px; padding-bottom: 3px" onclick="AddQuestion(this.parentNode.parentNode.parentNode.parentNode.id,'fillintheblanks')"/>
+                        <img src="/Images/truefalse.png" title="True False" style="border-radius: 40px; width: 100%; height: 50px; padding-bottom: 3px" onclick="AddQuestion(this.parentNode.parentNode.parentNode.parentNode.id,'Truefalse')"/>
+                        <img src="/Images/mcq.png" title="MCQs" style="border-radius:40px; width:100%; height:48px;"  onclick="AddQuestion(this.parentNode.parentNode.parentNode.parentNode.id,'MCQS')"/>
+
+                    </div>
+              </div>
+             
+                <input name="Sections[!].Section_Marks" type="text" placeholder="Marks" class="form-control" style="width: 80px; text-align: center; font-family: 'Roboto', sans-serif; font-size: 15px; border-radius: 8px; height: 44px; display:block; margin-right:5px; margin-right:0px; margin-left:5px;" />
+                <input name="Sections[!].Section_Order" type="number" max="100" min="1" contenteditable="false" placeholder="Order" class="form-control" style="font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 80px; text-align: center; display:block; margin-right:0px; margin-left:5px;" />
+                <img id="PartDeleteimg`+id+`" src="/Images/blackdustbin.png" style="width: 50px; padding-left:2px; padding-right:5px; padding-bottom:5px; box-sizing: border-box; height:9%; margin-top:-2px; margin-right:0px; margin-left:-2px;" onclick="delete_element(this.id)"   onmouseover = "RedDustbin(this.id)" onmouseout = "BlackDustbin(this.id)"/>
+            
+        </div>
+            <input type="text" name="Sections[!].Section_Text" id="QuestionEditor`+id+`">
+            <div  style="display:none;">  <input type="text"  id="AnswerEditor`+id+`"> </div>
+        `;
+
+        document.getElementById('Content').appendChild(div);
+        
+        CallJodit(id,'Type Section Header .....');
+        id++;
+        
+        if (flag == true)
+        {
+            AddQuestion(div.id,type);
+        }
+
+        
+    }
+
+
+    function SetValues()
+    {   
+        var pid = 0;
+        var qid = 0;
+        var oid = 0;
+
+        var Parts = document.getElementById('Content').children;
+        for (var i = 0 ; i < Parts.length ; i++)
+        { 
+            if (Parts[i].hasChildNodes() && Parts[i].className == 'Part')
+            {qid = 0;
+                
+                var Level1 = Parts[i].children;
+            
+                for (var j = 0 ; j < Level1.length ; j++)
+                {  
+                    if (Level1[j].hasChildNodes() && Level1[j].className == 'PartDetail')
+                    {
+                        var Level2 = Level1[j].children;
+                        for (var ji = 0 ; ji < Level2.length ; ji++)
+                        {
+                            if (Level2[ji].nodeName == 'INPUT')
+                            {
+                               Level2[ji].setAttribute('Name',Level2[ji].getAttribute('Name').replace('!',pid));
+                            }
+                        }
+                    }
+                    else if (Level1[j].nodeName == 'INPUT')
+                    {
+                        Level1[j].setAttribute('Name',Level1[j].getAttribute('Name').replace('!',pid));
+                    }
+                    else if (Level1[j].className == 'Question')
+                    {
+                        var Level3 = Level1[j].children;
+                        for (var jj = 0 ; jj < Level3.length ; jj++)
+                        {
+                            if (Level3[jj].hasChildNodes() && Level3[jj].className == 'Detail')
+                            {
+                                var Level4 = Level3[jj].children;
+                                for (var jk = 0 ; jk < Level4.length ; jk++)
+                                {
+                                    if (Level4[jk].nodeName == 'INPUT')
+                                    {
+                                        Level4[jk].setAttribute('Name',Level4[jk].getAttribute('Name').replace('!',pid));
+                                        Level4[jk].setAttribute('Name',Level4[jk].getAttribute('Name').replace('#',qid));
+                                    }
+                                }
+                            }
+                            else if (Level3[jj].nodeName == 'INPUT' && Level3[jj].getAttribute('type') == 'text')
+                            {
+                                Level3[jj].setAttribute('Name',Level3[jj].getAttribute('Name').replace('!',pid));
+                                Level3[jj].setAttribute('Name',Level3[jj].getAttribute('Name').replace('#',qid));
+                            }
+
+                            else if (Level3[jj].nodeName == 'INPUT' && Level3[jj].getAttribute('type') == 'radio' && Level3[jj].checked)
+                            {
+                                
+                                Level3[jj].setAttribute('Name',Level3[jj].getAttribute('Name').substring( Level3[jj].getAttribute('Name').indexOf('Sections'),500));
+                                Level3[jj].setAttribute('Name',Level3[jj].getAttribute('Name').replace('!',pid));
+                                Level3[jj].setAttribute('Name',Level3[jj].getAttribute('Name').replace('#',qid));
+                            }
+
+                            else if (Level3[jj].nodeName == 'DIV' && Level3[jj].hasChildNodes() && Level3[jj].className == 'MCQOptions')
+                            {
+                                oid = 0;
+                                var Level5 = Level3[jj].children;
+                                for (var jl = 0 ; jl < Level5.length ; jl++) 
+                                {
+                                    if (Level5[jl].className == 'input-group' && Level5[jl].nodeName == 'DIV')
+                                    {
+                                        var Level6 = Level5[jl].children;
+                                        
+                                        for (var jm = 0 ; jm < Level6.length ; jm++)
+                                        {
+                                            if (Level6[jm].nodeName == 'INPUT' && Level6[jm].getAttribute('type') == 'radio' &&  Level6[jm].checked)
+                                            {
+                                                Level6[jm].setAttribute('Name','Sections['+pid+'].Questions['+qid+'].Sample_Answer');
+                                                Level6[jm].value = Level6[jm+1].value;
+                                            }
+                                            else
+                                            {
+                                                if (Level6[jm].nodeName == 'INPUT' && Level6[jm].getAttribute('type') == 'text')
+                                                {
+                                                    Level6[jm].setAttribute('Name',Level6[jm].getAttribute('Name').replace('!',pid));
+                                                    Level6[jm].setAttribute('Name',Level6[jm].getAttribute('Name').replace('#',qid));
+                                                    Level6[jm].setAttribute('Name',Level6[jm].getAttribute('Name').replace('%',oid));
+                                                }
+                                            }
+                                        }
+                                        oid++;
+                                    }
+                                }
+                            }
+                        }
+                        qid++;
+                    }
+                }
+                pid++;
+            }
+        }
+    }
+
+    function CallJodit(id,title)
+    {  
+        if (title == '')
+        {title = 'Type Question here .....';}
+        
+        var editor = new Jodit('#QuestionEditor'+id, {
+            language: 'en',
+            i18n: {
+               en: { 'Type something':title.toString() } 
+            },
+            minHeight: '110px',
+            height:'100px',
+            buttons:['bold','italic','underline','superscript','subscript','ol','ul','table','align','fontsize','font','image','file','valign','undo','redo','hr','symbol'],
+            buttonsMD: ['bold', 'italic', 'underline', 'superscript', 'subscript', 'ol', 'ul', 'table', 'align', 'fontsize', 'font', 'image', 'file', 'valign', 'undo', 'redo', 'hr', 'symbol'],
+            buttonsSM: ['bold', 'italic', 'underline', 'superscript', 'subscript', 'ol', 'ul', 'table', 'align', 'fontsize', 'font', 'image', 'file', 'valign', 'undo', 'redo', 'hr', 'symbol'],
+            buttonsXS: ['bold', 'italic', 'underline', 'superscript', 'subscript', 'ol', 'ul', 'table', 'align', 'fontsize', 'font', 'image', 'file', 'valign', 'undo', 'redo','hr','symbol'],
+
+            uploader: {
+                url: 'https://xdsoft.net/jodit/connector/index.php?action=fileUpload'
+            },
+            filebrowser: {
+                ajax: {
+                    url: 'https://xdsoft.net/jodit/connector/index.php'
+                }
+            }
+        });
+        
+        var editor2 = new Jodit('#AnswerEditor'+id, {
+            language: 'en',
+            i18n: {
+                en: { 'Type something': 'Type Expected Answer here .....' }
+            },
+            minHeight: '100px',
+            height: '170px',
+           buttons: ['bold', 'italic', 'underline',  'ol', 'ul'],
+           buttonsMD: ['bold', 'italic', 'underline', 'ol', 'ul'],
+           buttonsSM: ['bold', 'italic', 'underline', 'ol', 'ul'],
+           buttonsXS: ['bold', 'italic', 'underline', 'ol', 'ul'],
+
+            uploader: {
+                url: 'https://xdsoft.net/jodit/connector/index.php?action=fileUpload'
+            },
+            filebrowser: {
+                ajax: {
+                    url: 'https://xdsoft.net/jodit/connector/index.php'
+                }
+            }
+        });
+    }
+
+    function delete_element(id)
+    {
+       
+        if (document.getElementById(id).parentNode.parentNode.getAttribute('Class') == 'Part')
+        {
+            document.getElementById('Content').removeChild(document.getElementById(id).parentNode.parentNode);
+        }
+        else if  (document.getElementById(id).parentNode.parentNode.getAttribute('Class') == 'Question')
+        {  
+            document.getElementById(document.getElementById(id).parentNode.parentNode.parentNode.id).removeChild(document.getElementById(id).parentNode.parentNode);
+        }
+        
+    }
+
+
+
+    function RedClose(id)
+    {document.getElementById(id).src = '/Images/redclose.png';}
+
+    function BlackClose(id)
+    {document.getElementById(id).src = '/Images/blackclose.png';}
+
+    function RedDustbin(id)
+    {document.getElementById(id).src = '/Images/reddustbin.png';}
+
+    function BlackDustbin(id)
+    {document.getElementById(id).src = '/Images/blackdustbin.png';}
+
+    
+    var datetime = new Date();
+    document.getElementById('datePicker').valueAsDate = new Date();
+    document.getElementById('timepickerstart').defaultValue  = datetime.getHours() + ':' + datetime.getMinutes(); 
+    document.getElementById('timepickerend').defaultValue  = (datetime.getHours()+2) + ':' + datetime.getMinutes(); 
+
+
+    function SaveExam()
+    {
+        SetValues();
+        document.getElementById('Disable').style.display = "block";
+        document.getElementById('loader').style.display = "block";
+
+        //$.ajax({
+        //    url: "/Teacher/AddExam",
+        //    type: "POST",
+        //    data: $("form").serialize()
+        //}).done(function(){
+        //    document.getElementById('loader').style.display = "none";
+        //    document.getElementById('Success').style.display = "block";
+        //}).fail(function(){
+        //    document.getElementById('loader').style.display = "none";
+        //    document.getElementById('Failure').style.display = "block";
+        
+        //});
+
+
+
+        $.ajax({
+            url: "/Teacher/AddExam",
+            type: "POST",
+            data: $("form").serialize()
+        }).success(function (result, status, xhr) {
+            document.getElementById('loader').style.display = "none";
+            document.getElementById('Success').style.display = "block";
+            document.getElementById("btnview").addEventListener("click", function(){ViewExam(xhr.statusText)});
+
+        }).fail(function(e){
+            document.getElementById('loader').style.display = "none";
+            document.getElementById('Failure').style.display = "block";
+        
+        });
+    }
+
+
+    
+    function ViewExam(Eid) {
+       
+        $.ajax({
+            url: "/Teacher/PreviewExam",
+            type: "Get",
+            data: { ExamId:Eid}
+        }).success(function (result, status, xhr) {
+            if (result.search('<body id="LoginPage">') != -1)
+            { window.location.href = "@Url.Action("Login","Account")"; }
+            else if (result.search('<body id="ErrorPage">') != -1)
+            { window.location.href = "@Url.Action("Error","Account")"; }
+            else
+            {
+                $('#MainDiv').html(result);
+                window.history.pushState("object or string", "Title", "/Teacher/PreviewExam?ExamId=" + Eid);
+            }
+
+        }).fail(function (e) {
+            window.location.href = "@Url.Action("Error","Account")";
+        });
+
+    }
+
+
+  
+</script>
+
+
+<style>
+
+    html {
+        scroll-behavior: smooth;
+    } 
+    #box {
+        padding: 100px;
+        margin: 20px;
+        position: relative;
+    }
+
+    .jodit_toolbar {
+        background-color: #e9e9e9 !important;
+        border-top-left-radius: 15px !important;
+        border-top-right-radius: 15px !important;
+        border: 0px solid;
+    }
+
+    .jodit_container {
+        background-color: transparent !important;
+        clear: both !important;
+        margin-bottom: 5px !important;
+    }
+
+    .jodit_statusbar {
+        display:none !important;
+    }
+
+    .jodit_wysiwyg {
+        background-color: white !important;
+
+    }
+
+    .jodit_container:not(.jodit_inline) {
+    font-size :18px;
+    font-family:Calibri;
+    }
+
+    .jodit_container:not(.jodit_inline) .jodit_wysiwyg p {
+    margin:0px;
+    }
+
+        .jodit_container:not(.jodit_inline) .jodit_wysiwyg {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 13px;
+            padding-right: 13px;
+        }
+
+
+
+    .jodit_placeholder {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .jodit_container:not(.jodit_inline) .jodit_workplace {
+        border: 0px solid;
+        border-bottom-left-radius: 15px !important;
+        border-bottom-right-radius: 15px !important;
+        height:auto;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    }
+
+        .dropdown-content a {
+            color: black;
+        }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    @@keyframes click-wave {
+        0% {
+            height: 40px;
+            width: 40px;
+            opacity: 0.35;
+            position: relative;
+        }
+
+        100% {
+            height: 200px;
+            width: 200px;
+            margin-left: -80px;
+            margin-top: -80px;
+            opacity: 0;
+        }
+    }
+
+    .option-input {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        -o-appearance: none;
+        appearance: none;
+        position: relative;
+        top: 7px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        transition: all 0.15s ease-out 0s;
+        background: #808080;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 0.5rem;
+        outline: none;
+        position: relative;
+        z-index: 1000;
+        font-family: 'Roboto', sans-serif;
+    }
+
+        .option-input:hover {
+            background: #9faab7;
+        }
+
+        .option-input:checked {
+            background: #40e0d0;
+        }
+
+            .option-input:checked::before {
+                height: 25px;
+                width: 25px;
+                position: absolute;
+                content: '✔';
+                display: inline-block;
+                text-align: center;
+                line-height: 25px;
+                }
+
+            .option-input:checked::after {
+                -webkit-animation: click-wave 0.65s;
+                -moz-animation: click-wave 0.65s;
+                animation: click-wave 0.65s;
+                background: #40e0d0;
+                content: '';
+                display: block;
+                position: relative;
+                z-index: 100;
+            }
+
+        .option-input.radio {
+            border-radius: 50%;
+        }
+
+            .option-input.radio::after {
+                border-radius: 50%;
+            }
+
+
+    .user-input-wrp {
+        position: relative;
+        width: 150px;
+        margin:5px;
+    }
+
+        .user-input-wrp .inputText {
+            width: 100%;
+            outline: none;
+            border: none;
+            border-bottom: 3px solid black;
+            box-shadow: none !important;
+            padding: 6px;
+            padding-left: 8px;
+            padding-right: 8px;
+            height: 40px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+            .user-input-wrp .inputText:focus {
+                border-color: #002cff;
+                border-width: medium medium 3px;
+            }
+
+        .user-input-wrp .floating-label {
+            position: absolute;
+            pointer-events: none;
+            top: 30px;
+            left: 10px;
+            transition: 0.2s ease all;
+            font-size: 18px;
+            color: gray;
+        }
+
+        .user-input-wrp input:focus ~ .floating-label,
+        .user-input-wrp input:not(:focus):valid ~ .floating-label {
+            top: 4px;
+            left: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            opacity: 1;
+            color: #002cff;
+        }
+
+
+
+
+
+
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    }
+
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 6px;
+            /* Position the tooltip text - see examples below! */
+            position: absolute;
+            z-index: 1;
+        }
+
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
+
+
+
+
+
+    #loader {
+        border: 8px solid white;
+        border-radius: 50%;
+        border-top: 8px solid blue;
+        width: 80px;
+        height: 80px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+        z-index: 3000;
+        position: fixed;
+        left: 50%;
+        margin-left:-50px;
+        top: 40%;
+        bottom: 50%;
+    }
+
+/* Safari */
+@@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+   
+
+  
+</style>
+
+
+
+    
+

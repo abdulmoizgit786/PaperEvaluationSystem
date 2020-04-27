@@ -1,0 +1,664 @@
+﻿@model Evalin.Models.Exam
+
+
+<script src="~/Scripts/jodit.min.js"></script>
+@*-*@@*<script src="~/Scripts/jquery.min.js"></script>
+<script src="~/Scripts/jquery-3.js"></script>*@
+@*+*@<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<link href="~/Content/jodit.min.css" rel="stylesheet" />
+<script src="~/Scripts/boot4alert.min.js"></script>
+
+
+@{
+    ViewBag.Title = "Exam";
+    if (Request.IsAjaxRequest())
+    { Layout = ""; }
+    else
+    { Layout = "~/Views/Shared/StudentMasterPage.cshtml"; }
+        
+    String teacher = Evalin.Models.DataAccess.Reader("select T.full_name from Courses as C join Teacher as T on C.Teacher_Id = T.id where C.Course_Id = "+Model.Course_Id+"").ToString();
+    String Course = Evalin.Models.DataAccess.Reader("select Course_name from Courses where Course_Id = "+Model.Course_Id+"").ToString();
+    
+}
+
+<script>
+    var Timerid;
+    $(document).ready(function () {
+        Timerid = setInterval(UpdateTimer, 1000);
+        AutoSaverid = setInterval(AutoSave, 60000);
+    });
+
+    function CallJodit(id) {
+        var editor2 = new Jodit('#' + id, {
+            language: 'en',
+            i18n: {
+                en: { 'Type something': 'Type Your Answer here .....' }
+            },
+            minHeight: '100px',
+            height: '170px',
+            buttons: ['bold', 'italic', 'underline', 'ol', 'ul'],
+            buttonsMD: ['bold', 'italic', 'underline', 'ol', 'ul'],
+            buttonsSM: ['bold', 'italic', 'underline', 'ol', 'ul'],
+            buttonsXS: ['bold', 'italic', 'underline', 'ol', 'ul'],
+
+            uploader: {
+                url: 'https://xdsoft.net/jodit/connector/index.php?action=fileUpload'
+            },
+            filebrowser: {
+                ajax: {
+                    url: 'https://xdsoft.net/jodit/connector/index.php'
+                }
+            }
+        });
+    }
+
+    function UpdateTimer()
+    {
+        GetTime(@Model.Exam_Id);
+    }
+
+    function AutoSave()
+    {
+        Save();
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("AutoSave", "Student")',
+            data: $('#ExamForm').serialize(),
+            success: function (result) 
+            {
+                $("#AutoSaved").show();
+                setTimeout(function ()
+                {
+                    $("#AutoSaved").hide();
+                }, 3000);
+            },
+            error: function (result) {
+
+            }
+             
+         });
+
+    }
+
+    function GetTime(eid)
+    {
+        @*var link = '@Url.Action("GetRemainingTime", "Student")'+'?eid=***';
+        link = link.replace("***", eid);
+        $('#Timer').load(link);
+        if ($('#Timer').text() == '<span style=\"font-size:22px ; font-weight:bold; font-family:Calibri\">Finished</span>')
+        {
+            $("#FinishExam").click();
+        }*@
+
+           $.ajax({
+               url: "/Student/GetRemainingTime?eid="+eid,
+                type: "Get"
+            }).success(function (result, status, xhr) {
+                if (result.search('<body id="LoginPage">') != -1)
+                { window.location.href = "@Url.Action("Login","Account")"; }
+                else if (result.search('<body id="ErrorPage">') != -1)
+                { window.location.href = "@Url.Action("Error","Account")"; }
+                else
+                {
+                    $('#Timer').html(result);
+                    window.history.pushState("object or string", "Title", "/Student/GetRemainingTime?eid=" + eid);
+                    if ($('#Timer').text() == '<span style=\"font-size:22px ; font-weight:bold; font-family:Calibri\">Finished</span>') {
+                        $("#FinishExam").click();
+                    }
+
+                }
+
+            }).fail(function (e) {
+                window.location.href = "@Url.Action("Error","Account")";
+            });
+
+    }
+
+
+    function FSave()
+    {
+        clearInterval(Timerid);
+        clearInterval(AutoSaverid);
+        Save();
+     }
+
+    function Save()
+    {
+        var MCQOptions = document.querySelectorAll('[class*="MCQOptions"]');
+        var MCQSelectedValue = '';
+        for (var i = 0 ; i < MCQOptions.length ; i++)
+        {
+            var options = MCQOptions[i].children;
+            for (var j = 0; j < options.length; j++)
+            {
+                if (options[j].nodeName == 'DIV')
+                {
+                    if (options[j].children[0].nodeName == 'INPUT' && options[j].children[0].checked)
+                    {
+                        MCQSelectedValue = options[j].children[0].value;
+                    }
+                }
+                else if (options[j].nodeName == 'INPUT' && options[j].className == 'MCQSAnswer')
+                {
+                    options[j].value = MCQSelectedValue;
+                }
+            }
+        }
+
+        var TFSelectedValue = '';
+        var TFOptions = document.querySelectorAll('[class*="TFOptions"]');
+        for (var i = 0 ; i < TFOptions.length ; i++) {
+            var options = TFOptions[i].children;
+            for (var j = 0; j < options.length; j++)
+            {
+                if (options[j].nodeName == 'INPUT' && options[j].className != 'TFSAnswer')
+                {
+                    if (options[j].checked)
+                    { TFSelectedValue =  options[j].value; }
+                }
+                else if (options[j].nodeName == 'INPUT' && options[j].className == 'TFSAnswer')
+                {
+                    options[j].value = TFSelectedValue;
+                }
+            }
+        }
+
+        var flagFB = true;
+        var FBAnswers = '';
+        var FBOptions = document.querySelectorAll('[class*="FBOptions"]');
+        for (var i = 0 ; i < FBOptions.length ; i++) {
+            var options = FBOptions[i].children[0].children;
+            for (var j = 0; j < options.length; j++)
+            {
+                if (options[j].nodeName == 'INPUT' && options[j].className == 'FBAnswer FBStyle')
+                {
+                   if (flagFB)
+                    { FBAnswers = options[j].value; }
+                   else
+                    { FBAnswers = FBAnswers + '~*%*~' + options[j].value; }
+                   flagFB = false;
+                }
+                else if (options[j].nodeName == 'INPUT' && options[j].className == 'FBCAnswers')
+                {
+                    options[j].value = FBAnswers;
+                }
+            }
+        }
+   
+    }
+
+
+    function SetFBAnswers(SampleAnswer,FBOptionsId)
+    {
+        var list = SampleAnswer.split("~*%*~");
+        var incr = 0;
+        var FBOptions = document.querySelectorAll('[class*="FBOptions"]');
+        for (var i = 0 ; i < FBOptions.length ; i++) {
+            if (FBOptions[i].id == FBOptionsId) {
+                var options = FBOptions[i].children[0].children;
+                for (var j = 0; j < options.length; j++) {
+                    if (options[j].nodeName == 'INPUT' && options[j].className == 'FBAnswer FBStyle') {
+                        options[j].value = list[incr];
+                        incr = incr + 1;
+                    }
+                }
+            }
+            }
+    }
+
+    function SetMCQAnswers(SampleAnswer, MCQOptionsId) {
+        var MCQOptions = document.querySelectorAll('[class*="MCQOptions"]');
+        for (var i = 0 ; i < MCQOptions.length ; i++) {
+            if (MCQOptions[i].id == MCQOptionsId) {
+                var options = MCQOptions[i].children;
+                for (var j = 0; j < options.length; j++) {
+                    if (options[j].nodeName == 'DIV') {
+                        if (options[j].children[0].nodeName == 'INPUT') {
+                            options[j].children[0].checked = false;
+                            if (options[j].children[0].value == SampleAnswer)
+                            { options[j].children[0].checked = true; }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    function SetTFAnswers(SampleAnswer,TFOptionsId)
+    {
+        var TFOptions = document.querySelectorAll('[class*="TFOptions"]');
+        for (var i = 0 ; i < TFOptions.length ; i++) {
+            if (TFOptions[i].id == TFOptionsId) {
+                var options = TFOptions[i].children;
+                for (var j = 0; j < options.length; j++) {
+                    if (options[j].nodeName == 'INPUT') {
+                        options[j].checked = false;
+                        if (options[j].value == SampleAnswer)
+                        { options[j].checked = true; }
+                    }
+                }
+            }
+        }
+
+    }
+
+    function FBFocus(element) {
+        element.style.borderBottom = '2px solid blue';
+    }
+    function FBBlur(element) {
+        element.style.borderBottom = '2px solid black';
+    }
+
+</script>
+
+
+<div id="Content" style="width: 100%; height: auto; min-height:150px; display:block; ">
+
+    <div  style="position: sticky; top: 8px; display:flex; text-align:center; width: 220px; margin-left:auto; margin-top:-10px; margin-right:auto; height: auto; background-color: transparent; min-height: 30px; z-index: 2000; ">
+        
+        <div id="Timer"></div>
+        <img  id="AutoSaved" style="width:20px; height:20px ; margin:auto; margin-left:10px; display:none;"  src="~/Images/saveimg.ico" />
+    </div>
+
+
+
+    <div id="ExamDetail" style="width:100%;height:auto; background-color:#cbcbcb; min-height:40px; padding:10px;border-radius:10px; display:flex;  box-shadow:4px 4px 5px #000000 ;">
+
+        <div style="display: grid; position: relative; width: 20%; margin-bottom: auto; margin-top: auto; height: min-content; ">
+
+            <span class="LR"><span style="font-weight:bold;">Teacher : </span>@teacher</span>
+            <span class="LR"><span style="font-weight:bold;">Course : </span>@Course</span>
+            <span class="LR"><span style="font-weight:bold;">Duration : </span>@string.Format("{0:D2} Hours {1:D2} Minutes", Model.Duration.Hours, Model.Duration.Minutes)</span>
+            <span class="LR"><span style="font-weight:bold;">Total Marks : </span>@Model.Total_Marks.ToString()</span>
+
+        </div>
+       
+        <div style="display: grid; position: relative; left: auto; right: auto; width: 60%; text-align: center; margin-bottom: auto; margin-top: auto; height: min-content; ">
+
+            <span class ="Centre" style="font-weight: bold; font-family: Segoe UI; font-size: x-large; margin-bottom: 10px;">@Model.Exam_Name.ToString()</span>
+            
+            <span class="Centre" style="font-size:14px; "><span style="font-weight:bold;">Intructions : </span>If you try to cheat from anywhere. System will detect it and at the same movement your paper will be Rejected !
+            </span>
+
+        </div>
+
+        
+         <div style="display: grid; position: relative; right:0px; Top:0px;text-align:right; width:20%;  margin-bottom:auto; margin-top:auto; height:min-content;">
+
+            <span class="LR"><span style="font-weight:bold;">Exam Date : </span>@Model.Exam_Date.ToString("dd-MMM-yyyy")</span>
+             <span class="LR"><span style="font-weight:bold;">Start Time : </span>@Model.Start_Time.ToString("hh:mm tt")</span>
+             <span class="LR"><span style="font-weight:bold;">End Time : </span>@Model.End_Time.ToString("hh:mm tt")</span>
+             @if (Model.AutoSubmit)
+             {<span class="LR"><span style="font-weight:bold;">Auto Submit : </span>On</span>}
+           else
+             { <span class="LR"><span style="font-weight:bold;">Auto Submit : </span>Off</span>}
+
+        </div>
+
+    </div>
+
+
+    
+    @using (Html.BeginForm("SaveExam", "Student", FormMethod.Post, new { @id = "ExamForm" }))
+{
+
+    <div id="Exam" class="ExamPortion" style="width: 100%; height: auto; background-color: #d3d3d3; min-height: 40px; padding: 10px; padding-left: 5px; padding-right: 5px; border-radius: 10px; margin-top: 13px; box-shadow: 4px 4px 5px #000000; ">
+
+        @Html.HiddenFor(m => m.Exam_Id)
+        @Html.HiddenFor(m => m.Total_Marks)
+        @for (int s = 0; s < Model.Sections.Count<Evalin.Models.Section>(); s++)
+        {
+
+            <div class="Section" style="width: 100%; height: auto; background-color: #f3f3f3; min-height: 40px;  padding:1%; padding-left: 1%; padding-right: 1%; border-radius: 10px; text-align: left; margin-bottom: 10px; ">
+
+                <div style="display:flex; ">
+                    <div class="SectionText"><span><span style="font-weight:bold;">Section @((s + 1).ToString()) : </span>@Html.Raw(Model.Sections[s].Section_Text)</span></div>
+                    <div class="SectionMarks"><span>@Model.Sections[s].Section_Marks.ToString() Marks</span></div>
+                    @Html.HiddenFor(m => m.Sections[s].Section_Id)
+                </div>
+
+                @if (Model.Sections[s].Questions.Count<Evalin.Models.Question>() > 0)
+                {
+
+                    for (int q = 0; q < Model.Sections[s].Questions.Count<Evalin.Models.Question>(); q++)
+                    {
+                        @Html.HiddenFor(m => m.Sections[s].Questions[q].Question_Id)
+                        if (Model.Sections[s].Questions[q].Type.Equals("Descriptive"))
+                        {
+                            <div class="Descriptive" style="width: 100%; height: auto; min-height: 40px; padding-top: 2%; border-radius: 10px;  padding-left: 2%; padding-right: 2%; text-align: left; display:grid">
+                                <div style="display:flex;">
+                                    <div class="QuestionText"><span><span style="font-weight:bold;">Question @((q + 1).ToString()) : </span>@Html.Raw(Model.Sections[s].Questions[q].QuestionText.ToString())</span></div>
+                                    <div class="QuestionMarks"><span>@Model.Sections[s].Questions[q].Question_Marks.ToString() Marks</span></div>
+                                </div>
+                                @Html.TextBoxFor(m => m.Sections[s].Questions[q].Sample_Answer, new { @id = String.Concat("Q", Model.Sections[s].Questions[q].Question_Id.ToString()) })
+                                <script>CallJodit('@String.Concat("Q", Model.Sections[s].Questions[q].Question_Id.ToString())');</script>
+                            </div>
+                        }
+                        else if (Model.Sections[s].Questions[q].Type.Equals("MCQ"))
+                        {
+                            <div class="MCQ" style="width: 100%; height: auto; min-height: 40px; padding-top: 2%; border-radius: 10px; padding-left: 2%; padding-right: 2%; text-align: left; display: grid;">
+                                <div style="display:flex;">
+                                    <div class="QuestionText"><span><span style="font-weight:bold;">Question @((q + 1).ToString()) : </span>@Html.Raw(Model.Sections[s].Questions[q].QuestionText.ToString())</span></div>
+                                    <div class="QuestionMarks"><span>@Model.Sections[s].Questions[q].Question_Marks.ToString() Marks</span></div>
+                                </div>
+                                <div class="MCQOptions" id="@Model.Sections[s].Questions[q].Question_Id">
+                                    @if (Model.Sections[s].Questions[q].Options.Count() > 0)
+                                    {
+                                        for (int o = 0; o < Model.Sections[s].Questions[q].Options.Count(); o++)
+                                        {
+                                            <div>
+
+                                                <input type="radio" class="option-input radio" name="Sections[@s].Questions[@q].Question_Id" value="@Model.Sections[s].Questions[q].Options[o].ToString()" style="margin-left:5px; margin-right:7px;" />
+                                                @Model.Sections[s].Questions[q].Options[o].ToString()
+
+                                            </div>
+                                        }
+                                        @Html.HiddenFor(m => m.Sections[s].Questions[q].Sample_Answer, new { @class = "MCQSAnswer" })
+                                        if (!Model.Sections[s].Questions[q].Sample_Answer.Equals(""))
+                                        {
+                                            <script>SetMCQAnswers("@Model.Sections[s].Questions[q].Sample_Answer", "@Model.Sections[s].Questions[q].Question_Id");</script>}
+
+                                    }
+                                </div>
+                            </div>
+
+                        }
+                        else if (Model.Sections[s].Questions[q].Type.Equals("TF"))
+                        {
+                            <div class="TF" style="width: 100%; height: auto; min-height: 40px; padding-top: 2%; border-radius: 10px; padding-left: 2%; padding-right: 2%; text-align: left; display: grid;">
+                                <div style="display:flex;">
+                                    <div class="QuestionText"><span><span style="font-weight:bold;">Question @((q + 1).ToString()) : </span>@Html.Raw(Model.Sections[s].Questions[q].QuestionText.ToString())</span></div>
+                                    <div class="QuestionMarks"><span>@Model.Sections[s].Questions[q].Question_Marks.ToString() Marks</span></div>
+                                </div>
+
+                                <div class="TFOptions" id="@Model.Sections[s].Questions[q].Question_Id">
+
+                                    <input type="radio" class="option-input radio" name="Sections[@s].Questions[@q].Question_Id" value="True" style="margin-left:5px; margin-right:7px;" />@("True")
+                                    <input type="radio" class="option-input radio" name="Sections[@s].Questions[@q].Question_Id" value="False" style="margin-left:5px; margin-right:7px;" />@("False")
+
+                                    @Html.HiddenFor(m => m.Sections[s].Questions[q].Sample_Answer, new { @class = "TFSAnswer" })
+                                    @if (!Model.Sections[s].Questions[q].Sample_Answer.Equals(""))
+                                    {
+                                        <script>SetTFAnswers("@Model.Sections[s].Questions[q].Sample_Answer", "@Model.Sections[s].Questions[q].Question_Id");</script>}
+
+                                </div>
+                            </div>
+
+                        }
+                        else if (Model.Sections[s].Questions[q].Type.Equals("FB"))
+                        {
+
+                            <div class="FB" style="width: 100%; height: auto; min-height: 40px; padding-top: 2%; border-radius: 10px; padding-left: 2%; padding-right: 2%; text-align: left; display: grid;">
+                                <div style="display:flex;">
+                                    <div class="QuestionText FBOptions" id="@Model.Sections[s].Questions[q].Question_Id">
+                                        <span>
+                                            <span style="font-weight:bold;">Question @((q + 1).ToString()) : </span>
+                                            @Html.Raw(Model.Sections[s].Questions[q].QuestionText.ToString())
+                                            @Html.HiddenFor(m => m.Sections[s].Questions[q].Sample_Answer, new { @class = "FBCAnswers" })
+                                        </span>
+                                        @if (!Model.Sections[s].Questions[q].Sample_Answer.Equals(""))
+                                        {
+                                            <script>SetFBAnswers("@Model.Sections[s].Questions[q].Sample_Answer", "@Model.Sections[s].Questions[q].Question_Id");</script>
+                                        }
+
+                                    </div>
+                                    <div class="QuestionMarks"><span>@Model.Sections[s].Questions[q].Question_Marks.ToString() Marks</span></div>
+                                </div>
+                            </div>
+
+
+                        }
+                    }
+
+                }
+
+            </div>
+
+
+        }
+
+
+        <div style="display:flex; margin-left:auto; margin-right:auto; width:max-Content">
+
+            <button class="btn btn-secondary" type="submit" id="FinishExam" style="height: 42px; border-bottom: 3px solid black; width: auto; border-radius: 6px; display:flex; justify-content: flex-end" value="Submit" onclick="FSave()">
+                Finish Exam
+            </button>
+
+            <button class="btn btn-secondary" type="button" id="SaveExam" style="margin-left:10px; height: 42px; border-bottom: 3px solid black; width: auto; padding-left:10px; padding-right:10px; border-radius: 6px; display:flex; justify-content: flex-end" onclick="AutoSave()">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+}
+
+
+</div>
+
+<style>
+    .Centre {
+        font-family: Segoe UI;
+        line-height: 20px;
+    }
+    .LR {
+        font-family: Segoe UI;
+        line-height: 22px;
+        height: auto;
+        font-size: 13px;
+    }
+    .SectionText {
+        font-family: sans-serif;
+        height: auto;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .QuestionText {
+        font-family: sans-serif;
+        height: auto;
+        font-size: 15px;
+        width:100%;
+    }
+    .FBOptions {
+        font-family: sans-serif;
+        height: auto;
+        font-size: 15px;
+        width: 100%;
+        line-height:22px;
+    }
+
+    .SectionMarks {
+        text-align: right;
+        padding-right: 10px;
+        padding-bottom: 5px;
+        width: 120px;
+        font-size:18px;
+        font-weight:bold;
+        font-family:sans-serif;
+    }
+    .QuestionMarks {
+        font-weight: bold;
+        text-align: right;
+        width: 120px;
+        padding-right: 10px;
+        padding-bottom: 5px;
+    }
+    
+     .Section {
+        line-height: 18px;
+    }
+
+    .TFOptions {
+        display: inline-block;
+        font-family: sans-serif;
+        height: auto;
+        font-size: 14px;
+    }
+
+    .MCQOptions {
+        display: grid;
+        font-family: sans-serif;
+        height: auto;
+        font-size: 14px;
+    }
+
+
+
+
+
+
+
+
+
+
+    .option-input {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        -o-appearance: none;
+        appearance: none;
+        position: relative;
+        top: 7px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        transition: all 0.15s ease-out 0s;
+        background: #808080;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 0.5rem;
+        outline: none;
+        position: relative;
+        z-index: 1000;
+        font-family: 'Roboto', sans-serif;
+    }
+
+        .option-input:hover {
+            background: #9faab7;
+        }
+
+        .option-input:checked {
+            background: #40e0d0;
+        }
+
+            .option-input:checked::before {
+                height: 25px;
+                width: 25px;
+                position: absolute;
+                content: '✔';
+                display: inline-block;
+                text-align: center;
+                line-height: 25px;
+            }
+
+            .option-input:checked::after {
+                -webkit-animation: click-wave 0.65s;
+                -moz-animation: click-wave 0.65s;
+                animation: click-wave 0.65s;
+                background: #40e0d0;
+                content: '';
+                display: block;
+                position: relative;
+                z-index: 100;
+            }
+
+        .option-input.radio {
+            border-radius: 50%;
+        }
+
+            .option-input.radio::after {
+                border-radius: 50%;
+            }
+
+
+
+
+
+
+
+
+
+    .jodit_toolbar {
+        background-color: #86b1ff !important;
+        border-top-left-radius: 15px !important;
+        border-top-right-radius: 15px !important;
+        border: 0px solid;
+    }
+
+    .jodit_container {
+        background-color: transparent !important;
+        clear: both !important;
+        margin-bottom: 5px !important;
+        margin-top:5px !important;
+    }
+
+    .jodit_statusbar {
+        display: none !important;
+    }
+
+    .jodit_wysiwyg {
+        background-color: white !important;
+    }
+
+    .jodit_container:not(.jodit_inline) {
+        font-size: 18px;
+        font-family: Calibri;
+    }
+
+        .jodit_container:not(.jodit_inline) .jodit_wysiwyg p {
+            margin: 0px;
+        }
+
+        .jodit_container:not(.jodit_inline) .jodit_wysiwyg {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 13px;
+            padding-right: 13px;
+        }
+
+
+
+    .jodit_placeholder {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .jodit_container:not(.jodit_inline) .jodit_workplace {
+        border: 0px solid;
+        border-bottom-left-radius: 15px !important;
+        border-bottom-right-radius: 15px !important;
+        height: auto;
+    }
+
+
+
+    .FBStyle {
+        border: none;
+        border-bottom: 2px solid black;
+        outline: none;
+        padding-bottom: 0px;
+        padding-top: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+        font-family: Calibri;
+        border-radius: 6px;
+        background-color: transparent;
+        font-size: 17px;
+        margin-bottom: 5px;
+        min-width: 210px;
+    }
+
+</style>

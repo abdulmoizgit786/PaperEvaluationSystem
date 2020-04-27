@@ -1,0 +1,13 @@
+﻿@model Evalin.Models.Course
+
+@{
+    ViewBag.Title = "Course";
+    if (Request.IsAjaxRequest())
+    { Layout = ""; }
+    else
+    { Layout = "~/Views/Shared/TeacherMasterPage.cshtml"; }
+}
+
+<h2>Courses Page
+    </h2>
+

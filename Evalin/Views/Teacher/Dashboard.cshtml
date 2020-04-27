@@ -1,0 +1,116 @@
+﻿
+@{
+     ViewBag.Title = "Dashboard";
+     if (Request.IsAjaxRequest())
+    {Layout = "";}
+     else
+     { Layout = "~/Views/Shared/TeacherMasterPage.cshtml"; }
+}
+
+<div class="content">
+
+    <div class="container-fluid">
+
+
+        <div class="card card-success">
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Teacher Panel</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+
+                </div>
+
+            </div>
+
+            <div class="card-body panel-body panel-description" id="Courses">
+
+
+                <img src="~/Images/message.png" style="width:70px; height:70px; margin:5px;" />
+                <img src="~/Images/test(1).png" style="width: 70px; height: 70px; margin: 5px;" />
+                <img src="~/Images/exam.png" style="width: 70px; height: 70px; margin: 5px;" />
+
+            </div>
+
+        </div>
+
+
+        <div class="card card-success">
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Courses</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+              
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+    </div>
+</div>
+
+
+
+<style>
+
+    .user-input-wrp {
+        position: relative;
+        width: 20%;
+    }
+
+        .user-input-wrp .inputText {
+            width: 100%;
+            outline: none;
+            border: none;
+            border-bottom: 3px solid black;
+            box-shadow: none !important;
+            padding: 6px;
+            padding-left:8px;
+            padding-right:8px;
+            height:50px;
+            border-radius:8px;
+            font-size:18px;
+            
+        }
+    
+        .user-input-wrp .inputText:focus {
+            border-color: #002cff;
+            border-width: medium medium 3px;
+        }
+
+        .user-input-wrp .floating-label {
+            position: absolute;
+            pointer-events: none;
+            top: 35px;
+            left: 10px;
+            transition: 0.2s ease all;
+            font-size: 18px;
+            color:gray;
+        }
+
+        .user-input-wrp input:focus ~ .floating-label,
+        .user-input-wrp input:not(:focus):valid ~ .floating-label {
+            top: 4px;
+            left: 10px;
+            font-weight:600;
+            font-size: 12px;
+            opacity: 1;
+            color: #002cff;
+        }    
+</style>
+
+

@@ -1,0 +1,351 @@
+﻿@model Evalin.Models.User
+@{
+    Layout = null;
+}
+
+@{
+    var Ractive = "";
+    var Lactive = "";
+    try
+    {
+        var active = ViewData["ActivePage"].ToString();
+        if (active.Equals("Register"))
+        { Ractive = "active"; }
+        else
+        { Lactive = "active"; }
+    
+    }
+    catch (Exception ex)
+    { Lactive = "active"; }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="~/Content/font-awesome.min.css">
+    <link rel="stylesheet" href="~/Content/form-elements.css">
+    <link rel="stylesheet" href="~/Content/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <title>Evalin</title>
+    <link rel="shortcut icon" href="~/Images/logo.png">
+    <style type="text/css">
+
+         .validation {
+            color: Red;
+            font-family : 'calibri';
+            font-size: 13px;
+            text-align: left;
+            margin-top: 3px;
+            margin-left: 5px;
+            display:block;
+        }
+        .row {
+            margin-right: 0px;
+            margin-left: 0px;
+        }
+        input[type='radio']:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -2px;
+            left: -1px;
+            position: relative;
+            background-color: #d1d3d1;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 2px solid white;
+        }
+
+        input[type='radio']:checked:after {
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+            top: -2px;
+            left: -1px;
+            position: relative;
+            background-color: #ffa500;
+            content: '';
+            display: inline-block;
+            visibility: visible;
+            border: 2px solid white;
+        }
+
+   </style>
+    
+    
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.backstretch.min.js"></script>
+    <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
+    <script src="~/Scripts/LoginScripts.js"></script>
+    <script>
+        debugger;
+        window.onpopstate = function (e) {
+            var Controller = window.location.href.split('/')[3];
+            var View = window.location.href.split('/')[4];
+            if (Controller.toString() != "" || View.toString() != "")
+            {
+                var link = "@Url.Action("View","Controller")";
+                window .location.href = link.replace("View", View).replace("Controller",Controller);
+            }
+            else {
+              window .location.href = "@Url.Action("Login","Account")";
+            }
+
+        }
+    </script>
+    
+
+</head>
+
+
+    <body id="LoginPage">
+    <div class="top-content" id="Login">
+        <div class="container">
+
+            <div class="row" style="padding-top:20px;">
+
+                <div class="col-sm-5 ">
+
+                    <div class="row">
+                        <h1 style="font-family:abeatbyKai; color:white;" >Evalin</h1>
+                    </div>
+
+
+                    @*width remove krdena miss ko demo dene ke liye kiya tha*@
+                    <div class="row forms-right-icons" style="width:500px;">
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <h3>Goal & Objective</h3>
+                                <p>The main goal of this system is to built a system that can evaluate papers whether it is objective or descriptive paper.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <h3>Facilitates Teachers</h3>
+                                <p>The objective of this system is to facilitate teachers and students by overcoming exam conducting and marking issues.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <h3>Exam Notification</h3>
+                                <p>Students will be notified about the schedule of upcoming exam via email address.</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <div class="col-sm-6 col-sm-push-1">
+
+                    <div class="row show-forms" style="text-align:center;">
+                        <span class="show-register-form @(Ractive)">Register</span>
+                        <span class="show-forms-divider">/</span>
+                        <span class="show-login-form @(Lactive)">Login</span>
+                    </div>
+
+
+                    <div class="row register-form @(Ractive)">
+
+                        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @role = "form", @class = "r-form", @enctype = "multipart/form-data" }))
+                        {
+                            <div class="row">
+
+                                @Html.TextBoxFor(m => m.Image, new {@type="file", @id="file1", @name="image", @accept="image/*" ,@style="display:none" })
+                                <img src="~/Images/ImagePlaceholder.jpg" id="upfile1" style="cursor: pointer; width: 120px; height: 120px;  border-radius: 50%;box-shadow: 0px 6px 10px -1px; margin-bottom : 20px;" />
+                                
+
+                            </div>
+
+                            <div class="col-sm-6">
+
+
+                                <div class="row">
+
+                                    <div class="form-group">
+
+                                        @Html.TextBoxFor(m => m.Fullname, new { @name = "r-form-first-name", @placeholder = "Full name...", @class = "r-form-first-name form-control rfn", @id = "r-form-first-name", @tabindex = "1" })
+                                        @Html.ValidationMessageFor(m => m.Fullname, "", new { @class = "validation", @id = "rf_fv" })
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group">
+                                        @Html.TextBoxFor(m => m.Username, new { @name = "r-form-username", @placeholder = "Username...", @class = "r-form-email form-control", @id = "r-form-username", @tabindex = "2" })
+                                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "validation", @id = "rf_uv" })
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group">
+
+                                        @Html.PasswordFor(m => m.Password, new { @name = "r-form-password", @placeholder = "Password...", @class = "r-form-password form-control", @id = "r-form-password", @tabindex = "3" })
+                                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation", @id = "rf_pv" })
+
+                                    </div>
+
+
+                                </div>
+
+
+
+                                <div class="row">
+
+                                    <div class="form-group">
+
+                                        @Html.PasswordFor(m => m.Password, new { @name = "r-form-password", @placeholder = "Confirm Password...", @class = "r-form-password form-control", @id = "r-form-cpassword", @tabindex = "4" })
+                                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation", @id = "rf_cpv" })
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-sm-6">
+
+                                <div class="row">
+
+                                    <div class="form-group">
+
+                                        @Html.TextBoxFor(m => m.Emailaddress, new { @name = "r-form-email", @placeholder = "Email Address...", @class = "r-form-email form-control", @id = "r-form-email", @tabindex = "5" })
+                                        @Html.ValidationMessageFor(m => m.Emailaddress, "", new { @class = "validation", @id = "rf_ev" })
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+
+                                    <div style="width: 60%; float: left;">
+                                        <div class="form-group">
+
+                                            @Html.DropDownListFor(m => m.Gender, new SelectList(new List<string> { "Male", "Female" }), new { @class = "form-control", @style = "font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px;", @tabindex = "6" })
+
+                                        </div>
+                                    </div>
+
+
+                                    <div style="width: 30%;float:right;">
+                                        <div class="form-group">
+
+                                            @Html.TextBoxFor(m => m.Age, new { @name = "age", @type = "number", @min = "5", @max = "100", @step = "1", @placeholder = "Age", @class = "form-control", @style = "font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius: 8px; max-width: 130px;", @tabindex = "7" })
+                                            @Html.ValidationMessageFor(m => m.Age, "", new { @class = "validation", @id = "rf_av" })
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group">
+
+                                          @Html.TextBoxFor(m => m.DOB, new { @name = "datepicker", @id = "datepicker", @placeholder = "Date of Birth", @pattern = "(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))", @readonly = "true", @style = "background-color : white ; font-size: 15px; font-weight: 300; font-family: 'Roboto', sans-serif; height: 44px; border-radius:8px 0px 0px 8px; ", @tabindex = "8" })
+                                        @Html.ValidationMessageFor(m => m.DOB, "", new { @class = "validation", @id = "rf_dv" })
+                                    
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row" style="text-align:center; height:59px;">
+
+
+                                    <div style="width: 50%; float: left; margin: auto; position:relative; top:20%;">
+                                        <div class="form-group">
+
+                                            <label style="font-family: Helvetica Neue,Helvetica,Arial,sans-serif; font-size: 14px; color: white;">
+                                                @Html.RadioButtonFor(m => m.type, "Student", new { @checked = "True", @style = "margin-right:8px;", @tabindex = "9" })Student
+                                            </label>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div style="width: 50%; float: left; margin: auto; position: relative; top: 20%;">
+                                        <div class="form-group">
+
+                                            <label style="font-family: Helvetica Neue,Helvetica,Arial,sans-serif; font-size:14px; color:white;">
+                                                @Html.RadioButtonFor(m => m.type, "Teacher", new { @style = "margin-right:8px;", @tabindex = "10" })Teacher
+                                            </label>
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+
+                            </div>
+
+
+                            <div class="row">
+                                <button type="submit" class="btn" tabindex="11">Register Account</button>
+                                @Html.ValidationMessage("Summary", "", new { @class = "validation", @id = "rf_mv" })
+                            </div>
+                        }
+
+
+
+                    </div>
+
+                    <div class="row login-form @(Lactive) col-sm-7 col-sm-push-3">
+
+
+                        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @role = "form", @class = "l-form" }))
+                        {
+                            <div class="form-group">
+                                @Html.TextBoxFor(m => m.Username, new { @placeholder = "Username...", @class = "l-form-username form-control", @id = "l-form-username", @name = "l-form-username", @tabindex = "1" })
+                                @Html.ValidationMessageFor(m => m.Username, "", new { @class = "validation lfv", @id = "lf_uv" })
+                            </div>
+                            <div class="form-group">
+                                @Html.PasswordFor(m => m.Password, new { @name = "l-form-password", @placeholder = "Password...", @class = "l-form-password form-control", @id = "l-form-password", @tabindex = "2" })
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation lfv", @id = "lf_pv" })
+                            </div>
+                            <button type="submit" class="btn" tabindex="3">Sign in!</button>
+                        }
+
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+
+   
+
+</body>
+</html>

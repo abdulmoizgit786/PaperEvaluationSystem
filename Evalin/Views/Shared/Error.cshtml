@@ -1,0 +1,64 @@
+﻿@{
+    String ErrorHeading = ViewBag.ErrorHeading;
+    String ErrorBody = ViewBag.ErrorBody;
+
+    if (ViewBag.ErrorHeading == null || ViewBag.ErrorHeading == "")
+    {
+        ErrorHeading = "Error 404";
+    }
+
+
+    if (Session["CurrentUser"] != null)
+    {
+        Evalin.Models.User user = (Evalin.Models.User)Session["CurrentUser"];
+        if (Request.IsAjaxRequest())
+        { Layout = ""; }
+
+        else
+        {
+            if (user.type.Equals("Student"))
+            { Layout = "~/Views/Shared/StudentMasterPage.cshtml"; }
+            else
+            { Layout = "~/Views/Shared/TeacherMasterPage.cshtml"; }
+        }
+    }
+    else { Response.Redirect("~/Account/Login"); }
+    
+}   
+
+
+
+<link href="~/Content/ErrorStyle.css" rel="stylesheet" />
+<link href='https://fonts.googleapis.com/css?family=Anton|Passion+One|PT+Sans+Caption' rel='stylesheet' type='text/css'>
+
+
+<body id="ErrorPage">
+
+
+    <div class="error" style="width:100%;height:100%;">
+        <div class="container-floud">
+            <div class="col-xs-12 text-center">
+                <div class="container-error-404">
+                    <div class="clip"><div class="shadow"><span class="digit" id="thirdDigit"></span></div></div>
+                    <div class="clip"><div class="shadow"><span class="digit" id="secondDigit"></span></div></div>
+                    <div class="clip"><div class="shadow"><span class="digit" id="firstDigit"></span></div></div>
+                    <div class="msg">OH!<span class="triangle"></span></div>
+                </div>
+                <h2 class="h1">@ErrorHeading</h2>
+                
+            </div>
+        </div>
+    </div>
+
+</body>
+@section Scripts{
+
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/ErrorScript.js"></script>
+
+}
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script src="~/Scripts/ErrorScript.js"></script>
+
+
+

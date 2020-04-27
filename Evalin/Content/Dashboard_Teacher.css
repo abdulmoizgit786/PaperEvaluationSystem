@@ -1,0 +1,317 @@
+﻿$grey : #545A5C;
+$lightgrey : #CBD1D2; $blue : #6691CC; $red : #D61643; $green : #8BBF43; .calendar {
+    position: relative;
+    overflow: hidden;
+    text-transform: capitalize;
+    text-align: center;
+    font: 15px/1em inherit;
+    color: $grey;
+}
+    
+    a{
+        text-decoration: none;
+        color: inherit;
+    }
+    
+       .btn{
+             display: inline-block;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            color: $lightgrey;
+            border-radius: 50%;
+            border: 2px solid $lightgrey;
+        }
+        
+        .btn:hover{
+            background:$lightgrey;
+            color: white;
+        }
+        
+        .btn-prev{
+            left:0;top:0;
+        } 
+        
+        .btn-next{
+            right:0;top:0; 
+        }
+        
+        .month{
+            padding:0;
+            margin:0;
+        }
+   
+    table{
+        width: auto;
+        margin: 10px 0;
+        border-spacing: 0px;  
+    }
+    
+    thead{
+        color:white;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    td{
+        padding: .12em .12em;
+    }
+    
+    .day{
+        display: inline-block;
+        width:2em;
+        height:2em;
+        line-height: 1.9em;
+        border-radius: 50%;
+        border: 2px solid transparent;
+    }
+    
+    .day:hover{
+        border: 2px solid $blue; 
+        text-decoration: none; 
+        color:white;
+    }
+    
+    .day.today{
+        background: $blue;
+        color:white;
+    }
+
+    .day.event{
+        background: $blue;
+        color:white;
+    }
+
+    .day.wrong-month{
+        color: rgb(235, 235, 235);
+    }
+    
+    .day.wrong-month:hover{
+        border: 2px solid transparent;
+    }
+    
+    .event-container{
+        display: none;
+        position:absolute;
+        top:0;left:0;
+        width: 100%;
+        height: 100%;
+        background:$grey;
+    }
+    
+    .filler{
+        position:absolute;
+        width:0;
+        height:0;
+        border-radius:50%;
+        background:$grey;
+        transform: translate(-50%,-50%);
+    }
+
+html { font-size: 10px; }
+
+body {
+    background: #F9F9F9 none repeat scroll 0% 0%;
+    color: #0E171C;
+    font: 300 100%/1.5em "Lato",sans-serif;
+    margin: 0px;
+}
+
+.icon_panel {
+ 
+  
+  text-align:center;
+ 
+}
+
+#student_panel {
+
+  background-color:transparent;
+ 
+}
+img {
+  
+  margin:5px;
+  border: 1px solid #ddd; /* Gray border */
+  border-radius: 10px;  /* Rounded border */
+  height:80px;
+  width: 80px; /* Set a small width */
+ 
+}
+.icon_title{
+    color:Black;
+    font-family:'Open Sans';
+    font:bolder;
+    font-weight:bolder;
+}
+/* Add a hover effect (blue shadow) */
+img:hover {
+  box-shadow: 0 0 5px 1px rgb(122, 193, 246);
+}
+
+.title{
+    text-align: center;
+}
+
+.subtitle{
+    color: rgb(80, 80, 80);
+    font-size: 1.2rem;
+    margin-top: 0.45rem;
+}
+
+.calendar-container{
+    position: relative;
+    margin: auto;
+   
+}
+
+.code-div{
+    margin:  auto;
+   
+}
+
+.calendar {
+  border: 1px solid #cccccc;
+    max-height:310px;
+    padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  text-transform: capitalize;
+  text-align: center;
+  font: 15px/1em inherit;
+  color: lightgoldenrodyellow; }
+  .calendar a {
+    text-decoration: none;
+    color: inherit; }
+  .calendar header .btn {
+    display: inline-block;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 18px;
+    color: #CBD1D2;
+   /* border-radius: 50%;
+    border: 2px solid #CBD1D2;*/ }
+  .calendar header .btn:hover {
+    background: #CBD1D2;
+    color: white; }
+  .calendar header .btn-prev {
+    left: 28px;
+    top: 12px; }
+  .calendar header .btn-next {
+    right: 28px;
+    top: 12px; }
+  .calendar header .month {
+    padding: 0;
+    margin: 0; }
+  .calendar table {
+    width: 100%;
+    margin: 10px 0;
+    border-spacing: 0px; }
+  .calendar thead {
+      color:#ff6a00;
+    font-size: 12px;
+    font-weight: 600; }
+  .calendar td {
+    padding: .12em .12em; }
+  .calendar .day {
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 1.9em;
+    border-radius: 50%;
+    color:#16e5d2;
+    border: 2px solid transparent; }
+  .calendar .day:hover {
+    border: 2px solid #6691CC;
+    color:white;
+  }
+  .calendar .day.today {
+    background: #6691CC;
+    color: white; }
+  .calendar .day.event {
+    color: rgb(252, 255, 0);
+    border: 2px solid #ff0000; }
+  .calendar .day.event:hover {
+    color: Black;
+    background-color:#00ffff;
+    border: 2px solid #0094ff; }
+  .calendar .day.wrong-month {
+    color: rgb(235, 235, 235); }
+  .calendar .day.wrong-month:hover {
+    border: 2px solid transparent; }
+  .calendar .event-container {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 50%;
+    color: white;
+    background: #545A5C; }
+  .calendar .filler {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: #545A5C;
+    transform: translate(-50%, -50%); }
+
+    /* Event Close button - ref : https://codepen.io/brissmyr/pen/egidw */
+    .event-container>p{
+      margin-top: 35%;
+      font-size: 1.2rem;
+    }
+    .event-container>.close {
+      position: absolute;
+      right: 32px;
+      top: 32px;
+      width: 32px;
+      height: 32px;
+      opacity: 0.3;
+    }
+    .event-container>.close:hover {
+      opacity: 1;
+    }
+    .event-container>.close:before, .event-container>.close:after {
+      position: absolute;
+      left: 15px;
+      content: ' ';
+      height: 33px;
+      width: 2px;
+      background-color: rgb(235, 235, 235);
+    }
+    .event-container>.close:before {
+      transform: rotate(45deg);
+    }
+    .event-container>.close:after {
+      transform: rotate(-45deg);
+    }
+
+
+.title{
+    text-align: center;
+}
+
+.subtitle{
+    color: rgb(80, 80, 80);
+    font-size: 1.2rem;
+    margin-top: 0.45rem;
+}
+
+.calendar-container{
+    position: relative;
+    margin: auto;
+    max-width: 300px;
+    max-height: 310px;
+    background-color:black;
+   
+}
+
+.code-div{
+    margin: 16px auto;
+    max-width: 700px;
+}

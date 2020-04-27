@@ -1,0 +1,74 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+     if (Request.IsAjaxRequest())
+    {Layout = "";}
+    else
+    {Layout = "~/Views/Shared/StudentMasterPage.cshtml";}
+}
+
+
+<h2> Student Dashboard</h2>
+
+
+
+
+<button onclick="Exam()" style="width:120px ; height:50px;">Start Exam</button>
+
+<br/>
+
+Contrary to popular belief, Lorem Ipsum is not simply random text Contrary to popular belief, Lorem Ipsum is not simply random text Contrary to popular belief, Lorem Ipsum is not simply random text 
+<input class="FBAnswer FBStyle" onfocus="FBFocus(this)" onblur="FBBlur(this)" onkeydown="FBChange(this)" />Contrary to popular belief, Lorem Ipsum is not simply random text Contrary to popular belief, Lorem Ipsum is not simply random text Contrary to popular belief, Lorem Ipsum is not simply random text
+<input class="FBAnswer FBStyle" onfocus="FBFocus(this)" onblur="FBBlur(this)" />
+<img src="~/Images/Grade_Sad.gif" style="width:180px; height:180px;"/>
+<img src="~/Images/Grade_Happy.gif" style="width:180px; height:180px;" />
+
+
+<script>
+  
+    function Exam()
+    {
+        var link = '@Url.Action("Exam", "Student")';
+        $("#MainDiv").load(link);
+    }
+
+    function FBFocus(element)
+    {
+        element.style.borderBottom = '2px solid blue';
+    }
+    function FBBlur(element)
+    {
+        element.style.borderBottom = '2px solid black';
+    }
+
+    function FBChange(element)
+    {
+        
+          //element.style.width = ((element.value.length + 1) * 3) + 'px';
+        
+    }
+
+    </script>
+
+<style>
+
+    .FBStyle {
+        border: none;
+        border-bottom: 2px solid black;
+        outline: none;
+        padding-bottom: 0px;
+        padding-top: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 5px;
+        margin-right: 5px;
+        font-family: Calibri;
+        border-radius: 6px;
+        background-color: transparent;
+        font-size:17px;
+        margin-bottom:5px;
+        min-width:210px;
+        
+    }
+
+</style>

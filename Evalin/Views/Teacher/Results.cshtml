@@ -1,0 +1,250 @@
+﻿@model  IEnumerable<Evalin.Models.Result>
+@{
+    if (Request.IsAjaxRequest())
+    {
+        Layout = "";
+    }
+    else
+    { Layout = "~/Views/Shared/TeacherMasterPage.cshtml"; }
+}
+
+
+@section Scripts
+{
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var table = $('#StudentsResult').dataTable();
+            $('#StudentsResult_wrapper').css('width', '100%');
+        });
+
+    </script>
+
+}
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var table = $('#StudentsResult').dataTable();
+        $('#StudentsResult_wrapper').css('width', '100%');
+    });
+
+</script>
+
+
+
+<div id="Success" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #6c757d; color: white; height:50px; border-radius:0px; font-weight:500">Warning</div>
+            <div class="modal-body">Sucessfully! Saved the Exam</div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-secondary boot4cancel" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none';document.getElementById('loader').style.display='none';document.getElementById('Success').style.display='none';">Back to Builder</button>
+                <button class="btn btn-primary boot4ok" id="btnview" data-dismiss="modal" type="button" onclick="CallView()">View</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="Failure" class="modal fade show" aria-modal="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #ff0000; color: white; height:50px; border-radius:0px; font-weight:500">Warning</div>
+            <div id="Failure_body" class="modal-body"></div>
+            <div class="modal-footer" style="border:0px white;">
+                <button class="btn btn-danger boot4cancel" data-dismiss="modal" type="button" onclick=" document.getElementById('Failure').style.display = 'none';  document.getElementById('loader').style.display = 'block';">Delete</button>
+                <button class="btn boot4ok" data-dismiss="modal" type="button" onclick="document.getElementById('Disable').style.display='none'; document.getElementById('Failure').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Disable" class="modal-backdrop fade show" style="display:none;"></div>
+<div id="loader" style="display:none;"></div>
+
+
+
+<div class="content">
+
+    <div class="container-fluid">
+       
+
+        <div class="card card-success">
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Result Filters</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+
+                </div>
+
+            </div>
+
+            <div class="card-body panel-body panel-description" id="Courses">
+
+
+                @*<table>
+                    <tr>
+                        <td class="Heading">Course Title </td>
+                        <td>@Model.Course.Name</td>
+
+                        <td class="Heading">Course Strength</td>
+
+
+                        <td>@(Model.Students != null ? Model.Students.Count().ToString() : "0")</td>
+
+                    </tr>
+                    <tr>
+                        <td class="Heading">Course Created Date </td>
+                        <td>@DateTime.Parse(@Model.Course.Date).ToString("dd-MMM-yyyy")</td>
+
+                        <td class="Heading">Course Enroll ID</td>
+                        <td>@Model.Course.Enroll_id</td>
+
+                    </tr>
+                    <tr>
+                        <td class="Heading">Course Status</td>
+                        <td>@Model.Course.Status</td>
+
+                        <td class="Heading">Course Enroll Password</td>
+                        <td>
+                            <span id="ep_hidden">***********</span>
+                            <span id="ep_shown" style="display:none;"> @Model.Course.Enroll_Password </span>
+                            <i class="fa fa-eye-slash" id="enroll_pass" style="float:right" onclick="TooglePassword(this);"></i>
+                        </td>
+
+                    </tr>
+
+                </table>*@
+
+
+            </div>
+
+        </div>
+
+
+        <div class="card card-success">
+            <div class="card-header HeadingPanel">
+                <h3 class="card-title">Result Record</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row" id="Courses">
+
+                    <table id="StudentsResult" class="display" style="width:100% !important;">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Exam</th>
+                                <th>Obt. Marks</th>
+                                <th>Total Marks</th>
+                                <th>Grade</th>
+                                <th>Percentage</th> 
+                                <th>Action</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (Evalin.Models.Result item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Student_Name</td>
+                                        <td>@item.Course_Name</td>
+                                        <td>@item.Exam_Name</td>
+                                        <td>@item.Obtain_Marks.ToString()</td>
+                                        <td>@item.Total_Marks.ToString()</td>
+                                        @if(item.Grade.Equals("F"))
+                                        {<td style="background-color: #f84e4e; color: white; font-weight: bold; ">@item.Grade</td>}
+                                        else
+                                        {<td style="background-color: #56ae30b3; color: white; font-weight: bold; ">@item.Grade</td>}
+                                        <td>@(Math.Round(item.Percentage,1).ToString()+"%")</td>
+                                        <td><img src="~/Images/Result_Edit.png" style="width:28px; height:26px; margin:5px" onclick="ViewResult('@item.ResultId.ToString()')" /><img src="~/Images/Result_View.png" style="width: 28px; height: 26px; margin: 5px" onclick="ViewResult('@item.ResultId.ToString()')" /></td>
+                                        
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+    </div>
+</div>
+
+
+<style>
+
+    #StudentsResult th {
+        font-size: 16px;
+        font-family: 90%/1.45em "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif !important;
+        font-weight: 600;
+        text-align: left;
+        overflow:hidden;
+    }
+
+
+    #StudentsResult td {
+        font-size: 15px;
+        font-family: 90%/1.45em "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif !important;
+        font-weight: 400;
+        text-align: left;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        
+    }
+
+    table{
+       table-layout:fixed;
+   
+       }
+    
+    #StudentsResult th:nth-child(8){
+        width: 5% !important;
+        text-align: center !important;
+    }
+
+    #StudentsResult th:nth-child(2) {
+        width: 12% !important;
+    }
+
+    #StudentsResult th:nth-child(1) {
+        width: 9% !important;
+    }
+
+    #StudentsResult th:nth-child(3) {
+        width: 9% !important;
+    }
+
+    #StudentsResult th:nth-child(4), th:nth-child(5), th:nth-child(6), th:nth-child(7), td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7) {
+
+        width:6.2% !important;
+        text-align: center !important;
+    }
+
+
+</style>
